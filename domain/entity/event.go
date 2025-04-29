@@ -13,6 +13,14 @@ type EventMessage string
 type StartDateTIme time.Time
 type EndDateTime time.Time
 type EventClosingDateTime time.Time
+type Vote string
+
+type VotedMember struct {
+	IsArrival       bool
+	UserID          UserID
+	ArrivalDateTime time.Time
+	Vote            Vote
+}
 
 type Event struct {
 	EventID              EventID
@@ -27,4 +35,5 @@ type Event struct {
 	EventStartDateTime   StartDateTIme
 	EventEndDateTime     EndDateTime
 	EventClosingDateTime EventClosingDateTime
+	VotedMembers         []VotedMember
 }
