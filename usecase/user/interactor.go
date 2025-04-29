@@ -5,22 +5,22 @@ import (
 	"chikokulympic-api/domain/repository"
 )
 
-type userUsecase struct {
+type userUsecaseImpl struct {
 	userRepo repository.UserRepository
 }
 
 func NewUserUsecase(r repository.UserRepository) UserUsecase {
-	return &userUsecase{userRepo: r}
+	return &userUsecaseImpl{userRepo: r}
 }
 
-func (u *userUsecase) RegisterUser(user *entity.User) (*entity.User, error) {
+func (u *userUsecaseImpl) RegisterUser(user *entity.User) (*entity.User, error) {
 	return u.userRepo.CreateUser(user)
 }
 
-func (u *userUsecase) AuthenticateUser(authID entity.AuthID) (*entity.User, error) {
+func (u *userUsecaseImpl) AuthenticateUser(authID entity.AuthID) (*entity.User, error) {
 	return u.userRepo.FindUserByAuthID(authID)
 }
 
-func (u *userUsecase) UpdateUserName(user *entity.User) (*entity.User, error) {
+func (u *userUsecaseImpl) UpdateUserName(user *entity.User) (*entity.User, error) {
 	return u.userRepo.UpdateUser(user)
 }
