@@ -1,0 +1,13 @@
+package repository
+
+import (
+	"chikokulympic-api/domain/entity"
+)
+
+type GroupRepository interface {
+	FindGroupByGroupID(GroupID entity.GroupID) (*entity.Group, error)
+	FindGroupByUserID(UserID entity.UserID) (*entity.Group, error)
+	CreateGroup(Group *entity.Group) (*entity.Group, error)
+	DeleteGroup(Group *entity.Group) (*entity.Group, error)
+	UpdateGroup(Group *entity.Group) (*entity.Group, error)
+}

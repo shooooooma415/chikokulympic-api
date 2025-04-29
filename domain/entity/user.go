@@ -1,4 +1,4 @@
-package user
+package entity
 
 type UserID string
 type AuthID string

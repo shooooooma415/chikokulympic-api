@@ -1,16 +1,11 @@
-package group
-
-import (
-	"chikokulympic-api/domain/event"
-	"chikokulympic-api/domain/user"
-)
+package entity
 
 type GroupID string
 type GroupName string
 type GroupDescription string
 
-type GroupMembers []user.UserID
-type GroupEvents []event.EventID
+type GroupMembers []UserID
+type GroupEvents []EventID
 
 type Group struct {
 	GroupID          GroupID
