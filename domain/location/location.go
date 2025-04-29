@@ -1,6 +1,6 @@
 package location
 
-import user "chikokulympic-api/domain/auth"
+import user "chikokulympic-api/domain/user"
 
 type Latitude float64
 type Longitude float64
