@@ -1,8 +1,6 @@
-package event
+package entity
 
 import (
-	"chikokulympic-api/domain/location"
-	"chikokulympic-api/domain/user"
 	"time"
 )
 
@@ -23,9 +21,9 @@ type Event struct {
 	EventLocationName    LocationName
 	Cost                 Cost
 	EventMessage         EventMessage
-	EventAuthorID        user.UserID
-	Latitude             location.Latitude
-	Longitude            location.Longitude
+	EventAuthorID        UserID
+	Latitude             Latitude
+	Longitude            Longitude
 	EventStartDateTime   StartDateTIme
 	EventEndDateTime     EndDateTime
 	EventClosingDateTime EventClosingDateTime
