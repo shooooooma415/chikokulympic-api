@@ -7,9 +7,9 @@ type FCMToken string
 type Alias string
 
 type User struct {
-	UserID   UserID   `json:"user_id"`
-	AuthID   AuthID   `json:"auth_id"`
-	UserName UserName `json:"user_name"`
-	FCMToken FCMToken `json:"fcm_token"`
-	Alias    Alias    `json:"alias"`
+	UserID   UserID   `bson:"user_id" json:"user_id"`
+	AuthID   AuthID   `bson:"auth_id" json:"auth_id"`
+	UserName UserName `bson:"user_name" json:"user_name"`
+	FCMToken FCMToken `bson:"fcm_token" json:"fcm_token"`
+	Alias    Alias    `bson:"alias" json:"alias"`
 }
