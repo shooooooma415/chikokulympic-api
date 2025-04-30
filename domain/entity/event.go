@@ -16,24 +16,23 @@ type EventClosingDateTime time.Time
 type Vote string
 
 type VotedMember struct {
-	IsArrival       bool
-	UserID          UserID
-	ArrivalDateTime time.Time
-	Vote            Vote
+	IsArrival       bool      `bson:"is_arrival"`
+	UserID          UserID    `bson:"user_id"`
+	ArrivalDateTime time.Time `bson:"arrival_date_time"`
 }
 
 type Event struct {
-	EventID              EventID
-	EventTitle           EventTitle
-	EventDescription     EventDescription
-	EventLocationName    LocationName
-	Cost                 Cost
-	EventMessage         EventMessage
-	EventAuthorID        UserID
-	Latitude             Latitude
-	Longitude            Longitude
-	EventStartDateTime   StartDateTIme
-	EventEndDateTime     EndDateTime
-	EventClosingDateTime EventClosingDateTime
-	VotedMembers         []VotedMember
+	EventID              EventID              `bson:"event_id"`
+	EventTitle           EventTitle           `bson:"event_title"`
+	EventDescription     EventDescription     `bson:"event_description"`
+	EventLocationName    LocationName         `bson:"event_location_name"`
+	Cost                 Cost                 `bson:"cost"`
+	EventMessage         EventMessage         `bson:"event_message"`
+	EventAuthorID        UserID               `bson:"event_author_id"`
+	Latitude             Latitude             `bson:"latitude"`
+	Longitude            Longitude            `bson:"longitude"`
+	EventStartDateTime   StartDateTIme        `bson:"event_start_date_time"`
+	EventEndDateTime     EndDateTime          `bson:"event_end_date_time"`
+	EventClosingDateTime EventClosingDateTime `bson:"event_closing_date_time"`
+	VotedMembers         []VotedMember        `bson:"voted_members"`
 }
