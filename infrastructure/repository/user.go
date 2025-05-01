@@ -26,7 +26,7 @@ func (r *userRepository) FindUserByUserID(userID entity.UserID) (*entity.User, e
 	err := r.userCollection.FindOne(context.Background(), bson.M{"user_id": userID}).Decode(&user)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, nil 
+			return nil, nil
 		}
 		return nil, err
 	}
@@ -54,20 +54,15 @@ func (r *userRepository) CreateUser(user *entity.User) (*entity.User, error) {
 }
 
 func (r *userRepository) DeleteUser(userID *entity.UserID) (*entity.User, error) {
-	user, err := r.FindUserByUserID(*userID)
-	if err != nil {
-		return nil, err
-	}
-	if user == nil {
-		return nil, errors.New("user not found")
-	}
+	var deletedUser entity.User
+	filter := bson.M{"user_id": *userID}
 
-	_, err = r.userCollection.DeleteOne(context.Background(), bson.M{"user_id": userID})
+	err := r.userCollection.FindOneAndDelete(context.Background(), filter).Decode(&deletedUser)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return &deletedUser, nil
 }
 
 func (r *userRepository) UpdateUser(user *entity.User) (*entity.User, error) {
