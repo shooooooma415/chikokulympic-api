@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"chikokulympic-api/domain/entity"
 	"chikokulympic-api/domain/repository"
@@ -46,10 +47,15 @@ func (r *userRepository) FindUserByAuthID(authID entity.AuthID) (*entity.User, e
 }
 
 func (r *userRepository) CreateUser(user *entity.User) (*entity.User, error) {
-	_, err := r.userCollection.InsertOne(context.Background(), user)
+	result, err := r.userCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		return nil, err
 	}
+
+	if result.InsertedID == nil {
+		return nil, fmt.Errorf("failed to insert user")
+	}
+
 	return user, nil
 }
 
