@@ -5,32 +5,33 @@ import (
 	"testing"
 
 	"chikokulympic-api/domain/entity"
+	mongoDb "chikokulympic-api/infrastructure/db/mongo"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // テスト用のMongoDBクライアントとデータベース接続を設定する
 func setupTestDB(t *testing.T) (*mongo.Database, func()) {
-	// テスト用のMongoDBに接続（ローカルかテスト用のコンテナを想定）
-	// 実際の環境に合わせて適宜修正してください
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+
+	db, client, err := mongoDb.GetMongoDBConnectionWithEnvFile(".env.local")
 	if err != nil {
 		t.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
 
-	// テスト用の一時データベースを作成
-	db := client.Database("test_chikokulympic")
-
-	// クリーンアップ関数を返す
 	cleanup := func() {
+		// テスト用DBを削除
 		err := db.Drop(context.Background())
 		if err != nil {
-			t.Fatalf("Failed to drop test database: %v", err)
+			t.Logf("Warning: Failed to drop test database: %v", err)
 		}
-		client.Disconnect(context.Background())
+
+		// MongoDB接続を閉じる
+		err = mongoDb.DisconnectMongoDB(client)
+		if err != nil {
+			t.Logf("Warning: Failed to disconnect from MongoDB: %v", err)
+		}
 	}
 
 	return db, cleanup
