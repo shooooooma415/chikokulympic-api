@@ -6,6 +6,7 @@ import (
 
 type EventID string
 type EventTitle string
+type EventPassword string
 type EventDescription string
 type LocationName string
 type Cost int
@@ -24,6 +25,7 @@ type VotedMember struct {
 type Event struct {
 	EventID              EventID              `bson:"event_id" json:"event_id"`
 	EventTitle           EventTitle           `bson:"event_title" json:"event_title"`
+	EventPassword        EventPassword        `bson:"event_password" json:"event_password"`
 	EventDescription     EventDescription     `bson:"event_description" json:"event_description"`
 	EventLocationName    LocationName         `bson:"event_location_name" json:"event_location_name"`
 	Cost                 Cost                 `bson:"cost" json:"cost"`
