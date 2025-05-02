@@ -1,0 +1,185 @@
+package repository
+
+import (
+	"context"
+	"testing"
+
+	"chikokulympic-api/domain/entity"
+	mongoDB "chikokulympic-api/infrastructure/db/mongo"
+
+	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+func setupTestDB(t *testing.T) (*mongo.Database, func()) {
+
+	db, client, err := mongoDB.GetMongoDBConnectionWithEnvFile(".env.local")
+	if err != nil {
+		t.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+
+	cleanup := func() {
+		err := db.Drop(context.Background())
+		if err != nil {
+			t.Logf("Warning: Failed to drop test database: %v", err)
+		}
+
+		err = mongoDB.DisconnectMongoDB(client)
+		if err != nil {
+			t.Logf("Warning: Failed to disconnect from MongoDB: %v", err)
+		}
+	}
+
+	return db, cleanup
+}
+
+func TestFindUserByUserID(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	testUser := &entity.User{
+		UserID:   "test-user-id",
+		AuthID:   "test-auth-id",
+		UserName: "Test User",
+		FCMToken: "fcm-token-123",
+		Alias:    "tester",
+	}
+
+	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
+	assert.NoError(t, err)
+
+	repo := NewUserRepository(db)
+
+	foundUser, err := repo.FindUserByUserID(testUser.UserID)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, foundUser)
+	assert.Equal(t, testUser.UserID, foundUser.UserID)
+	assert.Equal(t, testUser.AuthID, foundUser.AuthID)
+	assert.Equal(t, testUser.UserName, foundUser.UserName)
+}
+
+func TestFindUserByAuthID(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	testUser := &entity.User{
+		UserID:   "test-user-id",
+		AuthID:   "test-auth-id",
+		UserName: "Test User",
+		FCMToken: "fcm-token-123",
+		Alias:    "tester",
+	}
+
+	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
+	assert.NoError(t, err)
+
+	repo := NewUserRepository(db)
+
+	foundUser, err := repo.FindUserByAuthID(testUser.AuthID)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, foundUser)
+	assert.Equal(t, testUser.UserID, foundUser.UserID)
+	assert.Equal(t, testUser.AuthID, foundUser.AuthID)
+}
+
+func TestCreateUser(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	repo := NewUserRepository(db)
+
+	testUser := &entity.User{
+		UserID:   "new-user-id",
+		AuthID:   "new-auth-id",
+		UserName: "New User",
+		FCMToken: "fcm-token-new",
+		Alias:    "newbie",
+	}
+
+	createdUser, err := repo.CreateUser(testUser)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, createdUser)
+	assert.Equal(t, testUser.UserID, createdUser.UserID)
+
+	var savedUser entity.User
+	err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": testUser.UserID}).Decode(&savedUser)
+	assert.NoError(t, err)
+	assert.Equal(t, testUser.UserName, savedUser.UserName)
+}
+
+func TestUpdateUser(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	testUser := &entity.User{
+		UserID:   "update-user-id",
+		AuthID:   "update-auth-id",
+		UserName: "Update User",
+		FCMToken: "fcm-token-update",
+		Alias:    "updater",
+	}
+
+	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
+	assert.NoError(t, err)
+
+	repo := NewUserRepository(db)
+
+	updatedUserName := entity.UserName("Updated User Name")
+	updatedAlias := entity.Alias("updated-alias")
+	testUser.UserName = updatedUserName
+	testUser.Alias = updatedAlias
+
+	updatedUser, err := repo.UpdateUser(testUser)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, updatedUser)
+	assert.Equal(t, updatedUserName, updatedUser.UserName)
+	assert.Equal(t, updatedAlias, updatedUser.Alias)
+}
+
+func TestDeleteUser(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	testUser := &entity.User{
+		UserID:   "delete-user-id",
+		AuthID:   "delete-auth-id",
+		UserName: "Delete User",
+		FCMToken: "fcm-token-delete",
+		Alias:    "deleter",
+	}
+
+	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
+	assert.NoError(t, err)
+
+	repo := NewUserRepository(db)
+
+	userID := testUser.UserID
+	deletedUser, err := repo.DeleteUser(&userID)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, deletedUser)
+	assert.Equal(t, testUser.UserID, deletedUser.UserID)
+
+	var count int64
+	count, err = db.Collection("users").CountDocuments(context.Background(), bson.M{"user_id": userID})
+	assert.NoError(t, err)
+	assert.Equal(t, int64(0), count)
+}
+
+func TestFindUserNotFound(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	repo := NewUserRepository(db)
+
+	nonExistentID := entity.UserID("non-existent-id")
+	user, err := repo.FindUserByUserID(nonExistentID)
+
+	assert.NoError(t, err)
+	assert.Nil(t, user)
+}
