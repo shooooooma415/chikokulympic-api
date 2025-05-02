@@ -28,8 +28,8 @@ func NewMongoConfig(envFile string) *MongoConfig {
 	}
 
 	// 環境変数からMongoDBの接続情報を取得
-	uri := config.GetEnvWithDefault("MONGO_URI", "mongodb://localhost:27017")
-	database := config.GetEnvWithDefault("MONGO_DATABASE", "chikokulympic")
+	uri := config.GetRequiredEnv("MONGO_URI")
+	database := config.GetRequiredEnv("MONGO_DATABASE")
 
 	return &MongoConfig{
 		URI:      uri,
@@ -77,10 +77,4 @@ func GetMongoDBConnectionWithEnvFile(envFile string) (*mongo.Database, *mongo.Cl
 
 	client := db.Client()
 	return db, client, nil
-}
-
-// GetMongoDBConnection は環境変数からMongoDB接続を取得します（後方互換性のため維持）
-func GetMongoDBConnection() (*mongo.Database, *mongo.Client, error) {
-	// デフォルトで.env.localを読み込む
-	return GetMongoDBConnectionWithEnvFile(".env.local")
 }
