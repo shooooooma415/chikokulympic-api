@@ -13,6 +13,7 @@ type SignupRequest struct {
 	FCMToken string `json:"token"`
 	UserName string `json:"user_name"`
 	AuthID   string `json:"auth_id"`
+	UserIcon string `json:"user_icon"`
 }
 
 type SignupResponse struct {
@@ -43,6 +44,7 @@ func (s *Signup) Handle(c echo.Context) error {
 		AuthID:   entity.AuthID(req.AuthID),
 		UserName: entity.UserName(req.UserName),
 		FCMToken: entity.FCMToken(req.FCMToken),
+		UserIcon: entity.UserIcon(req.UserIcon),
 	}
 
 	registeredUser, err := s.Execute(user)
