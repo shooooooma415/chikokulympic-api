@@ -26,7 +26,7 @@ func NewSignin(usecase usecase.AuthenticateUserUseCase) *Signin {
 		AuthenticateUserUseCase: usecase,
 	}
 }
-func (s *Signin) Handle(c echo.Context) error {
+func (s *Signin) Handler(c echo.Context) error {
 	req := new(SigninRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse(err.Error()))

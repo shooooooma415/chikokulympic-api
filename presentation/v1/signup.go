@@ -30,7 +30,7 @@ func NewSignup(usecase usecase.RegisterUserUseCase) *Signup {
 	}
 }
 
-func (s *Signup) Handle(c echo.Context) error {
+func (s *Signup) Handler(c echo.Context) error {
 	req := new(SignupRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse(err.Error()))
