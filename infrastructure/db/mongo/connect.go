@@ -1,11 +1,12 @@
-package db
+package mongo
 
 import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
+
+	"chikokulympic-api/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -17,9 +18,18 @@ type MongoConfig struct {
 	Database string
 }
 
-func NewMongoConfig() *MongoConfig {
-	uri := os.Getenv("MONGO_URI")
-	database := os.Getenv("MONGO_DATABASE")
+// NewMongoConfig はMongoDBの設定を生成します
+// 引数にファイル名を指定すると、そのファイルから環境変数を読み込みます
+// ファイル名が空の場合は、環境変数のみを使用します
+func NewMongoConfig(envFile string) *MongoConfig {
+	// 環境変数ファイルを読み込む（指定されている場合）
+	if envFile != "" {
+		config.LoadEnvFileOrDefault(envFile)
+	}
+
+	// 環境変数からMongoDBの接続情報を取得
+	uri := config.GetEnvWithDefault("MONGO_URI", "mongodb://localhost:27017")
+	database := config.GetEnvWithDefault("MONGO_DATABASE", "chikokulympic")
 
 	return &MongoConfig{
 		URI:      uri,
@@ -57,8 +67,9 @@ func DisconnectMongoDB(client *mongo.Client) error {
 	return nil
 }
 
-func GetMongoDBConnection() (*mongo.Database, *mongo.Client, error) {
-	config := NewMongoConfig()
+// GetMongoDBConnectionWithEnvFile は指定された環境変数ファイルを読み込んでMongoDB接続を取得します
+func GetMongoDBConnectionWithEnvFile(envFile string) (*mongo.Database, *mongo.Client, error) {
+	config := NewMongoConfig(envFile)
 	db, err := ConnectMongoDB(config)
 	if err != nil {
 		return nil, nil, err
@@ -66,4 +77,10 @@ func GetMongoDBConnection() (*mongo.Database, *mongo.Client, error) {
 
 	client := db.Client()
 	return db, client, nil
+}
+
+// GetMongoDBConnection は環境変数からMongoDB接続を取得します（後方互換性のため維持）
+func GetMongoDBConnection() (*mongo.Database, *mongo.Client, error) {
+	// デフォルトで.env.localを読み込む
+	return GetMongoDBConnectionWithEnvFile(".env.local")
 }
