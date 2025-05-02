@@ -18,8 +18,8 @@ type MongoConfig struct {
 }
 
 func NewMongoConfig() *MongoConfig {
-	uri := os.Getenv("MONGODB_URI")
-	database := os.Getenv("MONGODB_DATABASE")
+	uri := os.Getenv("MONGO_URI")
+	database := os.Getenv("MONGO_DATABASE")
 
 	return &MongoConfig{
 		URI:      uri,

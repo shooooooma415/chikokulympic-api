@@ -10,19 +10,16 @@ services:
     env_file:
       - ./.env
     depends_on:
-      - db
+      - mongo
 
-  db:
-    image: postgres:14
+  mongo:
+    image: mongo:6
     restart: always
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: dbname
+    container_name: mongo
     ports:
-      - "5432:5432"
+      - "27017:27017"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - mongo_data:/data/db
 
 volumes:
-  db_data:
+  mongo_data:
