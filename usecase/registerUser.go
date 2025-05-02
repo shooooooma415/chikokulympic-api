@@ -3,6 +3,8 @@ package usecase
 import (
 	"chikokulympic-api/domain/entity"
 	"chikokulympic-api/domain/repository"
+
+	"github.com/google/uuid"
 )
 
 type RegisterUserUseCase interface {
@@ -20,5 +22,8 @@ func NewRegisterUserUseCase(userRepo repository.UserRepository) *RegisterUserUse
 }
 
 func (uc *RegisterUserUseCaseImpl) Execute(user *entity.User) (*entity.User, error) {
+	userID := uuid.New().String()
+	user.UserID = entity.UserID(userID)
+
 	return uc.userRepo.CreateUser(user)
 }
