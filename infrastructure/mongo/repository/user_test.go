@@ -1,11 +1,12 @@
-package repository
+package repository_test
 
 import (
 	"context"
 	"testing"
 
 	"chikokulympic-api/domain/entity"
-	mongoDB "chikokulympic-api/infrastructure/db/mongo"
+	mongoDB "chikokulympic-api/infrastructure/mongo"
+	"chikokulympic-api/infrastructure/mongo/repository"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -48,8 +49,7 @@ func TestFindUserByUserID(t *testing.T) {
 
 	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
 	assert.NoError(t, err)
-
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 
 	foundUser, err := repo.FindUserByUserID(testUser.UserID)
 
@@ -75,7 +75,7 @@ func TestFindUserByAuthID(t *testing.T) {
 	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
 	assert.NoError(t, err)
 
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 
 	foundUser, err := repo.FindUserByAuthID(testUser.AuthID)
 
@@ -89,7 +89,7 @@ func TestCreateUser(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 
 	testUser := &entity.User{
 		UserID:   "new-user-id",
@@ -126,7 +126,7 @@ func TestUpdateUser(t *testing.T) {
 	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
 	assert.NoError(t, err)
 
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 
 	updatedUserName := entity.UserName("Updated User Name")
 	updatedAlias := entity.Alias("updated-alias")
@@ -156,7 +156,7 @@ func TestDeleteUser(t *testing.T) {
 	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
 	assert.NoError(t, err)
 
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 
 	userID := testUser.UserID
 	deletedUser, err := repo.DeleteUser(&userID)
@@ -175,7 +175,7 @@ func TestFindUserNotFound(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	repo := NewUserRepository(db)
+	repo := repository.NewUserRepository(db)
 
 	nonExistentID := entity.UserID("non-existent-id")
 	user, err := repo.FindUserByUserID(nonExistentID)
