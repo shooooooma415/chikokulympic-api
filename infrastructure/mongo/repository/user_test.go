@@ -5,38 +5,15 @@ import (
 	"testing"
 
 	"chikokulympic-api/domain/entity"
-	mongoDB "chikokulympic-api/infrastructure/mongo"
 	"chikokulympic-api/infrastructure/mongo/repository"
+	"chikokulympic-api/infrastructure/mongo/repository/testUtils"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func setupTestDB(t *testing.T) (*mongo.Database, func()) {
-
-	db, client, err := mongoDB.GetMongoDBConnectionWithEnvFile(".env.local")
-	if err != nil {
-		t.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-
-	cleanup := func() {
-		err := db.Drop(context.Background())
-		if err != nil {
-			t.Logf("Warning: Failed to drop test database: %v", err)
-		}
-
-		err = mongoDB.DisconnectMongoDB(client)
-		if err != nil {
-			t.Logf("Warning: Failed to disconnect from MongoDB: %v", err)
-		}
-	}
-
-	return db, cleanup
-}
-
 func TestFindUserByUserID(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
 
 	testUser := &entity.User{
@@ -61,7 +38,7 @@ func TestFindUserByUserID(t *testing.T) {
 }
 
 func TestFindUserByAuthID(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
 
 	testUser := &entity.User{
@@ -86,7 +63,7 @@ func TestFindUserByAuthID(t *testing.T) {
 }
 
 func TestCreateUser(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repository.NewUserRepository(db)
@@ -112,7 +89,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestUpdateUser(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
 
 	testUser := &entity.User{
@@ -142,7 +119,7 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
 
 	testUser := &entity.User{
@@ -172,7 +149,7 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestFindUserNotFound(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repository.NewUserRepository(db)
