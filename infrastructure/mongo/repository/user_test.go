@@ -12,151 +12,288 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func TestFindUserByUserID(t *testing.T) {
+func TestUserRepository(t *testing.T) {
+	// 各テストで共通のセットアップ処理
 	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
-
-	testUser := &entity.User{
-		UserID:   "test-user-id",
-		AuthID:   "test-auth-id",
-		UserName: "Test User",
-		FCMToken: "fcm-token-123",
-		Alias:    "tester",
-	}
-
-	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
-	assert.NoError(t, err)
 	repo := repository.NewUserRepository(db)
 
-	foundUser, err := repo.FindUserByUserID(testUser.UserID)
+	t.Run("FindUserByUserID", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			user     *entity.User
+			userID   entity.UserID
+			expected *entity.User
+			isFound  bool
+		}{
+			{
+				name: "正常系: 存在するユーザーIDで検索",
+				user: &entity.User{
+					UserID:   "test-user-id-1",
+					AuthID:   "test-auth-id-1",
+					UserName: "Test User 1",
+					FCMToken: "fcm-token-123",
+					Alias:    "tester1",
+				},
+				userID:   "test-user-id-1",
+				expected: nil, // 後でセット
+				isFound:  true,
+			},
+			{
+				name:     "異常系: 存在しないユーザーIDで検索",
+				user:     nil,
+				userID:   "non-existent-id",
+				expected: nil,
+				isFound:  false,
+			},
+		}
 
-	assert.NoError(t, err)
-	assert.NotNil(t, foundUser)
-	assert.Equal(t, testUser.UserID, foundUser.UserID)
-	assert.Equal(t, testUser.AuthID, foundUser.AuthID)
-	assert.Equal(t, testUser.UserName, foundUser.UserName)
-}
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				if tc.user != nil {
+					_, err := db.Collection("users").InsertOne(context.Background(), tc.user)
+					assert.NoError(t, err)
+					tc.expected = tc.user
+				}
 
-func TestFindUserByAuthID(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+				// テスト実行
+				foundUser, err := repo.FindUserByUserID(tc.userID)
 
-	testUser := &entity.User{
-		UserID:   "test-user-id",
-		AuthID:   "test-auth-id",
-		UserName: "Test User",
-		FCMToken: "fcm-token-123",
-		Alias:    "tester",
-	}
+				// 結果の検証
+				assert.NoError(t, err)
+				if tc.isFound {
+					assert.NotNil(t, foundUser)
+					assert.Equal(t, tc.expected.UserID, foundUser.UserID)
+					assert.Equal(t, tc.expected.AuthID, foundUser.AuthID)
+					assert.Equal(t, tc.expected.UserName, foundUser.UserName)
+				} else {
+					assert.Nil(t, foundUser)
+				}
 
-	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
-	assert.NoError(t, err)
+				// クリーンアップ
+				if tc.user != nil {
+					_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": tc.user.UserID})
+					assert.NoError(t, err)
+				}
+			})
+		}
+	})
 
-	repo := repository.NewUserRepository(db)
+	t.Run("FindUserByAuthID", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			user     *entity.User
+			authID   string
+			expected *entity.User
+			isFound  bool
+		}{
+			{
+				name: "正常系: 存在する認証IDで検索",
+				user: &entity.User{
+					UserID:   "test-user-id-2",
+					AuthID:   "test-auth-id-2",
+					UserName: "Test User 2",
+					FCMToken: "fcm-token-456",
+					Alias:    "tester2",
+				},
+				authID:   "test-auth-id-2",
+				expected: nil, // 後でセット
+				isFound:  true,
+			},
+			{
+				name:     "異常系: 存在しない認証IDで検索",
+				user:     nil,
+				authID:   "non-existent-auth-id",
+				expected: nil,
+				isFound:  false,
+			},
+		}
 
-	foundUser, err := repo.FindUserByAuthID(testUser.AuthID)
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				if tc.user != nil {
+					_, err := db.Collection("users").InsertOne(context.Background(), tc.user)
+					assert.NoError(t, err)
+					tc.expected = tc.user
+				}
 
-	assert.NoError(t, err)
-	assert.NotNil(t, foundUser)
-	assert.Equal(t, testUser.UserID, foundUser.UserID)
-	assert.Equal(t, testUser.AuthID, foundUser.AuthID)
-}
+				// テスト実行
+				foundUser, err := repo.FindUserByAuthID(entity.AuthID(tc.authID))
 
-func TestCreateUser(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+				// 結果の検証
+				assert.NoError(t, err)
+				if tc.isFound {
+					assert.NotNil(t, foundUser)
+					assert.Equal(t, tc.expected.UserID, foundUser.UserID)
+					assert.Equal(t, tc.expected.AuthID, foundUser.AuthID)
+				} else {
+					assert.Nil(t, foundUser)
+				}
 
-	repo := repository.NewUserRepository(db)
+				// クリーンアップ
+				if tc.user != nil {
+					_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"auth_id": tc.user.AuthID})
+					assert.NoError(t, err)
+				}
+			})
+		}
+	})
 
-	testUser := &entity.User{
-		UserID:   "new-user-id",
-		AuthID:   "new-auth-id",
-		UserName: "New User",
-		FCMToken: "fcm-token-new",
-		Alias:    "newbie",
-	}
+	t.Run("CreateUser", func(t *testing.T) {
+		testCases := []struct {
+			name  string
+			user  *entity.User
+			error bool
+		}{
+			{
+				name: "正常系: 新規ユーザー作成",
+				user: &entity.User{
+					UserID:   "new-user-id",
+					AuthID:   "new-auth-id",
+					UserName: "New User",
+					FCMToken: "fcm-token-new",
+					Alias:    "newbie",
+				},
+				error: false,
+			},
+			// 必要に応じて異常系のテストケースを追加
+		}
 
-	createdUser, err := repo.CreateUser(testUser)
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テスト実行
+				createdUser, err := repo.CreateUser(tc.user)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, createdUser)
-	assert.Equal(t, testUser.UserID, createdUser.UserID)
+				// 結果の検証
+				if tc.error {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, createdUser)
+					assert.Equal(t, tc.user.UserID, createdUser.UserID)
 
-	var savedUser entity.User
-	err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": testUser.UserID}).Decode(&savedUser)
-	assert.NoError(t, err)
-	assert.Equal(t, testUser.UserName, savedUser.UserName)
-}
+					// DBに保存されていることを確認
+					var savedUser entity.User
+					err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": tc.user.UserID}).Decode(&savedUser)
+					assert.NoError(t, err)
+					assert.Equal(t, tc.user.UserName, savedUser.UserName)
+				}
 
-func TestUpdateUser(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+				// クリーンアップ
+				_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": tc.user.UserID})
+				assert.NoError(t, err)
+			})
+		}
+	})
 
-	testUser := &entity.User{
-		UserID:   "update-user-id",
-		AuthID:   "update-auth-id",
-		UserName: "Update User",
-		FCMToken: "fcm-token-update",
-		Alias:    "updater",
-	}
+	t.Run("UpdateUser", func(t *testing.T) {
+		testCases := []struct {
+			name        string
+			initialUser *entity.User
+			updatedUser *entity.User
+			error       bool
+		}{
+			{
+				name: "正常系: ユーザー情報更新",
+				initialUser: &entity.User{
+					UserID:   "update-user-id",
+					AuthID:   "update-auth-id",
+					UserName: "Update User",
+					FCMToken: "fcm-token-update",
+					Alias:    "updater",
+				},
+				updatedUser: &entity.User{
+					UserID:   "update-user-id",
+					AuthID:   "update-auth-id",
+					UserName: "Updated User Name",
+					FCMToken: "fcm-token-update",
+					Alias:    "updated-alias",
+				},
+				error: false,
+			},
+			// 必要に応じて異常系のテストケースを追加
+		}
 
-	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
-	assert.NoError(t, err)
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				_, err := db.Collection("users").InsertOne(context.Background(), tc.initialUser)
+				assert.NoError(t, err)
 
-	repo := repository.NewUserRepository(db)
+				// テスト実行
+				updatedUser, err := repo.UpdateUser(tc.updatedUser)
 
-	updatedUserName := entity.UserName("Updated User Name")
-	updatedAlias := entity.Alias("updated-alias")
-	testUser.UserName = updatedUserName
-	testUser.Alias = updatedAlias
+				// 結果の検証
+				if tc.error {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, updatedUser)
+					assert.Equal(t, tc.updatedUser.UserName, updatedUser.UserName)
+					assert.Equal(t, tc.updatedUser.Alias, updatedUser.Alias)
 
-	updatedUser, err := repo.UpdateUser(testUser)
+					// DBが更新されたことを確認
+					var savedUser entity.User
+					err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": tc.initialUser.UserID}).Decode(&savedUser)
+					assert.NoError(t, err)
+					assert.Equal(t, tc.updatedUser.UserName, savedUser.UserName)
+					assert.Equal(t, tc.updatedUser.Alias, savedUser.Alias)
+				}
 
-	assert.NoError(t, err)
-	assert.NotNil(t, updatedUser)
-	assert.Equal(t, updatedUserName, updatedUser.UserName)
-	assert.Equal(t, updatedAlias, updatedUser.Alias)
-}
+				// クリーンアップ
+				_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": tc.initialUser.UserID})
+				assert.NoError(t, err)
+			})
+		}
+	})
 
-func TestDeleteUser(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+	t.Run("DeleteUser", func(t *testing.T) {
+		testCases := []struct {
+			name  string
+			user  *entity.User
+			error bool
+		}{
+			{
+				name: "正常系: ユーザー削除",
+				user: &entity.User{
+					UserID:   "delete-user-id",
+					AuthID:   "delete-auth-id",
+					UserName: "Delete User",
+					FCMToken: "fcm-token-delete",
+					Alias:    "deleter",
+				},
+				error: false,
+			},
+			// 必要に応じて異常系のテストケースを追加
+		}
 
-	testUser := &entity.User{
-		UserID:   "delete-user-id",
-		AuthID:   "delete-auth-id",
-		UserName: "Delete User",
-		FCMToken: "fcm-token-delete",
-		Alias:    "deleter",
-	}
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				_, err := db.Collection("users").InsertOne(context.Background(), tc.user)
+				assert.NoError(t, err)
 
-	_, err := db.Collection("users").InsertOne(context.Background(), testUser)
-	assert.NoError(t, err)
+				// テスト実行
+				userID := tc.user.UserID
+				deletedUser, err := repo.DeleteUser(&userID)
 
-	repo := repository.NewUserRepository(db)
+				// 結果の検証
+				if tc.error {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, deletedUser)
+					assert.Equal(t, tc.user.UserID, deletedUser.UserID)
 
-	userID := testUser.UserID
-	deletedUser, err := repo.DeleteUser(&userID)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, deletedUser)
-	assert.Equal(t, testUser.UserID, deletedUser.UserID)
-
-	var count int64
-	count, err = db.Collection("users").CountDocuments(context.Background(), bson.M{"user_id": userID})
-	assert.NoError(t, err)
-	assert.Equal(t, int64(0), count)
-}
-
-func TestFindUserNotFound(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
-
-	repo := repository.NewUserRepository(db)
-
-	nonExistentID := entity.UserID("non-existent-id")
-	user, err := repo.FindUserByUserID(nonExistentID)
-
-	assert.NoError(t, err)
-	assert.Nil(t, user)
+					// DBから削除されたことを確認
+					var count int64
+					count, err = db.Collection("users").CountDocuments(context.Background(), bson.M{"user_id": userID})
+					assert.NoError(t, err)
+					assert.Equal(t, int64(0), count)
+				}
+			})
+		}
+	})
 }
