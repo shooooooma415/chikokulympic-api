@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"chikokulympic-api/domain/entity"
-	"chikokulympic-api/domain/repository"
+	repo "chikokulympic-api/domain/repository"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,7 +16,7 @@ type userRepository struct {
 	userCollection *mongo.Collection
 }
 
-func NewUserRepository(db *mongo.Database) repository.UserRepository {
+func NewUserRepository(db *mongo.Database) repo.UserRepository {
 	return &userRepository{
 		userCollection: db.Collection("users"),
 	}
