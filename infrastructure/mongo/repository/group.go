@@ -27,11 +27,11 @@ func (gr *GroupRepo) FindGroupByGroupName(groupName *entity.GroupName) (*entity.
 	defer cancel()
 
 	var group entity.Group
-	filter := bson.M{"name": groupName}
+	filter := bson.M{"name": string(*groupName)} // ポインタをstring型に変換
 	err := gr.groupCollection.FindOne(ctx, filter).Decode(&group)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("group not found with name: %s", *groupName)
+			return nil, fmt.Errorf("group not found with name: %s", string(*groupName))
 		}
 		return nil, fmt.Errorf("error finding group by name: %w", err)
 	}
@@ -66,16 +66,7 @@ func (gr *GroupRepo) CreateGroup(group *entity.Group) (*entity.Group, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	existingFilter := bson.M{"name": group.GroupName}
-	count, err := gr.groupCollection.CountDocuments(ctx, existingFilter)
-	if err != nil {
-		return nil, fmt.Errorf("error checking duplicate group name: %w", err)
-	}
-	if count > 0 {
-		return nil, fmt.Errorf("グループ名 '%s' は既に使用されています", group.GroupName)
-	}
-
-	_, err = gr.groupCollection.InsertOne(ctx, group)
+	_, err := gr.groupCollection.InsertOne(ctx, group)
 	if err != nil {
 		return nil, fmt.Errorf("error creating group: %w", err)
 	}
