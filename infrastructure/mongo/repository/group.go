@@ -13,12 +13,12 @@ import (
 )
 
 type GroupRepo struct {
-	collection *mongo.Collection
+	groupCollection *mongo.Collection
 }
 
 func NewGroupRepo(db *mongo.Database) repo.GroupRepository {
 	return &GroupRepo{
-		collection: db.Collection("groups"),
+		groupCollection: db.Collection("groups"),
 	}
 }
 
@@ -28,7 +28,7 @@ func (gr *GroupRepo) FindGroupByGroupName(groupName *entity.GroupName) (*entity.
 
 	var group entity.Group
 	filter := bson.M{"name": groupName}
-	err := gr.collection.FindOne(ctx, filter).Decode(&group)
+	err := gr.groupCollection.FindOne(ctx, filter).Decode(&group)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("group not found with name: %s", *groupName)
@@ -51,7 +51,7 @@ func (gr *GroupRepo) FindGroupByUserID(userID entity.UserID) (*entity.Group, err
 		},
 	}
 
-	err := gr.collection.FindOne(ctx, filter).Decode(&group)
+	err := gr.groupCollection.FindOne(ctx, filter).Decode(&group)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, fmt.Errorf("no group found for user ID: %s", userID)
@@ -66,12 +66,7 @@ func (gr *GroupRepo) CreateGroup(group *entity.Group) (*entity.Group, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	existingGroup, err := gr.FindGroupByGroupName(&group.GroupName)
-	if err == nil && existingGroup != nil {
-		return nil, fmt.Errorf("group with name %s already exists", group.GroupName)
-	}
-
-	_, err = gr.collection.InsertOne(ctx, group)
+	_, err := gr.groupCollection.InsertOne(ctx, group)
 	if err != nil {
 		return nil, fmt.Errorf("error creating group: %w", err)
 	}
@@ -86,7 +81,7 @@ func (gr *GroupRepo) UpdateGroup(group *entity.Group) (*entity.Group, error) {
 	filter := bson.M{"group_id": group.GroupID}
 	update := bson.M{"$set": group}
 
-	_, err := gr.collection.UpdateOne(ctx, filter, update)
+	_, err := gr.groupCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, fmt.Errorf("error updating group: %w", err)
 	}
@@ -100,7 +95,7 @@ func (gr *GroupRepo) DeleteGroup(group *entity.Group) (*entity.Group, error) {
 
 	filter := bson.M{"group_id": group.GroupID}
 
-	_, err := gr.collection.DeleteOne(ctx, filter)
+	_, err := gr.groupCollection.DeleteOne(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("error deleting group: %w", err)
 	}
