@@ -5,7 +5,7 @@ import (
 )
 
 type GroupRepository interface {
-	FindGroupByGroupID(GroupID entity.GroupID) (*entity.Group, error)
+	FindGroupByGroupID(Group *entity.Group) (*entity.Group, error)
 	FindGroupByUserID(UserID entity.UserID) (*entity.Group, error)
 	CreateGroup(Group *entity.Group) (*entity.Group, error)
 	DeleteGroup(Group *entity.Group) (*entity.Group, error)
