@@ -7,7 +7,7 @@ import (
 )
 
 type JoinGroupUseCase interface {
-	Execute(userID entity.UserID, group entity.Group) error
+	Execute(userID entity.UserID, group entity.Group) (*entity.GroupID, error)
 }
 
 type JoinGroupUseCaseImpl struct {
@@ -22,43 +22,43 @@ func NewJoinGroupUseCase(groupRepo repository.GroupRepository, userRepo reposito
 	}
 }
 
-func (uc *JoinGroupUseCaseImpl) Execute(userID entity.UserID, group entity.Group) error {
+func (uc *JoinGroupUseCaseImpl) Execute(userID entity.UserID, group entity.Group) (*entity.GroupID, error) {
 	groupFound, err := uc.groupRepo.FindGroupByGroupName(&group.GroupName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if groupFound == nil {
-		return fmt.Errorf("グループが見つかりません")
+		return nil, fmt.Errorf("グループが見つかりません")
 	}
 
 	if groupFound.GroupPassword != group.GroupPassword {
-		return fmt.Errorf("パスワードが一致しません")
+		return nil, fmt.Errorf("パスワードが一致しません")
 	}
 
 	user, err := uc.userRepo.FindUserByUserID(userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if user == nil {
-		return fmt.Errorf("ユーザーが見つかりません")
+		return nil, fmt.Errorf("ユーザーが見つかりません")
 	}
 
 	for _, memberID := range groupFound.GroupMembers {
 		if memberID == user.UserID {
-			return fmt.Errorf("すでにグループに参加しています")
+			return nil, fmt.Errorf("すでにグループに参加しています")
 		}
 	}
 
 	if groupFound.GroupManagerID == user.UserID {
-		return fmt.Errorf("あなたはこのグループのマネージャーです")
+		return nil, fmt.Errorf("あなたはこのグループのマネージャーです")
 	}
 
 	groupFound.GroupMembers = append(groupFound.GroupMembers, user.UserID)
 
-	_, err = uc.groupRepo.UpdateGroup(groupFound)
+	updatedGroup, err := uc.groupRepo.UpdateGroup(groupFound)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &updatedGroup.GroupID, nil
 }
