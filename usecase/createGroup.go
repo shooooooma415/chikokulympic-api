@@ -7,7 +7,7 @@ import (
 )
 
 type CreateGroupUseCase interface {
-	Execute(groupName string, groupPassword string, groupManagerID string, groupDescription string) (*entity.Group, error)
+	Execute(group *entity.Group) (*entity.Group, error)
 }
 
 type CreateGroupUseCaseImpl struct {
@@ -20,18 +20,10 @@ func NewCreateGroupUseCase(groupRepo repository.GroupRepository) *CreateGroupUse
 	}
 }
 
-func (uc *CreateGroupUseCaseImpl) Execute(groupName string, groupPassword string, groupManagerID string, groupDescription string) (*entity.Group, error) {
-	groupNameObj := entity.GroupName(groupName)
-	existingGroup, err := uc.groupRepo.FindGroupByGroupName(&groupNameObj)
+func (uc *CreateGroupUseCaseImpl) Execute(group *entity.Group) (*entity.Group, error) {
+	existingGroup, err := uc.groupRepo.FindGroupByGroupName(&group.GroupName)
 	if err == nil && existingGroup != nil {
-		return nil, fmt.Errorf("グループ名 '%s' は既に使用されています", groupName)
-	}
-
-	group := &entity.Group{
-		GroupName:        entity.GroupName(groupName),
-		GroupPassword:    entity.GroupPassword(groupPassword),
-		GroupManagerID:   entity.UserID(groupManagerID),
-		GroupDescription: entity.GroupDescription(groupDescription),
+		return nil, fmt.Errorf("グループ名 '%s' は既に使用されています", string(group.GroupName))
 	}
 
 	return uc.groupRepo.CreateGroup(group)
