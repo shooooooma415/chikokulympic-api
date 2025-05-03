@@ -21,7 +21,6 @@ func NewCreateGroupUseCase(groupRepo repository.GroupRepository) *CreateGroupUse
 }
 
 func (uc *CreateGroupUseCaseImpl) Execute(groupName string, groupPassword string, groupManagerID string, groupDescription string) (*entity.Group, error) {
-	// グループ名の重複チェック
 	groupNameObj := entity.GroupName(groupName)
 	existingGroup, err := uc.groupRepo.FindGroupByGroupName(&groupNameObj)
 	if err == nil && existingGroup != nil {
