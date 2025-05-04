@@ -7,7 +7,6 @@ import (
 	"chikokulympic-api/config"
 	"chikokulympic-api/infrastructure/mongo/repository"
 	serverV1 "chikokulympic-api/server/v1"
-	"chikokulympic-api/usecase"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -34,18 +33,11 @@ func main() {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello Chikokulympic-api"})
 	})
 
+	// リポジトリの初期化
 	userRepo := repository.NewUserRepository(db)
 
-	registerUserUseCase := usecase.NewRegisterUserUseCase(userRepo)
-	authenticateUserUseCase := usecase.NewAuthenticateUserUseCase(userRepo)
-	updateUserUseCase := usecase.NewUpdateUserUseCase(userRepo)
-
-	authServer := serverV1.NewAuthServer(
-		registerUserUseCase,
-		authenticateUserUseCase,
-		updateUserUseCase,
-	)
-
+	// サーバーの初期化とルーティング設定
+	authServer := serverV1.NewAuthServer(userRepo)
 	authServer.RegisterRoutes(e)
 
 	port := config.GetEnvWithDefault("PORT", "8080")
