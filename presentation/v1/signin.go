@@ -2,6 +2,7 @@ package v1
 
 import (
 	"chikokulympic-api/domain/entity"
+	"chikokulympic-api/domain/repository"
 	"chikokulympic-api/middleware"
 	"chikokulympic-api/usecase"
 	"net/http"
@@ -18,14 +19,15 @@ type SigninResponse struct {
 }
 
 type Signin struct {
-	usecase.AuthenticateUserUseCase
+	userRepo repository.UserRepository
 }
 
-func NewSignin(usecase usecase.AuthenticateUserUseCase) *Signin {
+func NewSignin(userRepo repository.UserRepository) *Signin {
 	return &Signin{
-		AuthenticateUserUseCase: usecase,
+		userRepo: userRepo,
 	}
 }
+
 func (s *Signin) Handler(c echo.Context) error {
 	req := new(SigninRequest)
 	if err := c.Bind(req); err != nil {
@@ -36,7 +38,8 @@ func (s *Signin) Handler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse("AuthIDは必須です"))
 	}
 
-	user, err := s.Execute(entity.AuthID(req.AuthID))
+	authID := entity.AuthID(req.AuthID)
+	user, err := usecase.NewAuthenticateUserUseCase(s.userRepo, authID).Execute()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, middleware.NewErrorResponse(err.Error()))
 	}
