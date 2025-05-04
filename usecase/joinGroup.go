@@ -7,23 +7,27 @@ import (
 )
 
 type JoinGroupUseCase interface {
-	Execute(userID entity.UserID, group entity.Group) (*entity.GroupID, error)
+	Execute() (*entity.GroupID, error)
 }
 
 type JoinGroupUseCaseImpl struct {
 	groupRepo repository.GroupRepository
 	userRepo  repository.UserRepository
+	userID    entity.UserID
+	group     entity.Group
 }
 
-func NewJoinGroupUseCase(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *JoinGroupUseCaseImpl {
+func NewJoinGroupUseCase(groupRepo repository.GroupRepository, userRepo repository.UserRepository, userID entity.UserID, group entity.Group) *JoinGroupUseCaseImpl {
 	return &JoinGroupUseCaseImpl{
 		groupRepo: groupRepo,
 		userRepo:  userRepo,
+		userID:    userID,
+		group:     group,
 	}
 }
 
-func (uc *JoinGroupUseCaseImpl) Execute(userID entity.UserID, group entity.Group) (*entity.GroupID, error) {
-	groupFound, err := uc.groupRepo.FindGroupByGroupName(&group.GroupName)
+func (uc *JoinGroupUseCaseImpl) Execute() (*entity.GroupID, error) {
+	groupFound, err := uc.groupRepo.FindGroupByGroupName(&uc.group.GroupName)
 	if err != nil {
 		return nil, err
 	}
@@ -31,11 +35,11 @@ func (uc *JoinGroupUseCaseImpl) Execute(userID entity.UserID, group entity.Group
 		return nil, fmt.Errorf("グループが見つかりません")
 	}
 
-	if groupFound.GroupPassword != group.GroupPassword {
+	if groupFound.GroupPassword != uc.group.GroupPassword {
 		return nil, fmt.Errorf("パスワードが一致しません")
 	}
 
-	user, err := uc.userRepo.FindUserByUserID(userID)
+	user, err := uc.userRepo.FindUserByUserID(uc.userID)
 	if err != nil {
 		return nil, err
 	}
