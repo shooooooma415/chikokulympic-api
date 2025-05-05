@@ -83,88 +83,7 @@ func TestGroupRepository(t *testing.T) {
 		}
 	})
 
-	t.Run("FindGroupByUserID", func(t *testing.T) {
-		// 定数の定義
-		managerID1 := entity.UserID("manager-user-id-2")
-		memberID1 := entity.UserID("member1-id-2")
-
-		testCases := []struct {
-			name        string
-			group       *entity.Group
-			userID      entity.UserID
-			expected    *entity.Group
-			shouldError bool
-		}{
-			{
-				name: "正常系: マネージャーIDでグループ検索",
-				group: &entity.Group{
-					GroupID:          "test-group-id-2",
-					GroupName:        "TestGroup2",
-					GroupPassword:    "password456",
-					GroupManagerID:   managerID1,
-					GroupDescription: "Test group description 2",
-					GroupMembers:     []entity.UserID{memberID1, "member2-id-2"},
-					GroupEvents:      []entity.EventID{"event1-id-2", "event2-id-2"},
-				},
-				userID:      managerID1,
-				expected:    nil, // 後でセット
-				shouldError: false,
-			},
-			{
-				name: "正常系: メンバーIDでグループ検索",
-				group: &entity.Group{
-					GroupID:          "test-group-id-3",
-					GroupName:        "TestGroup3",
-					GroupPassword:    "password789",
-					GroupManagerID:   "manager-user-id-3",
-					GroupDescription: "Test group description 3",
-					GroupMembers:     []entity.UserID{memberID1, "member2-id-3"},
-					GroupEvents:      []entity.EventID{"event1-id-3", "event2-id-3"},
-				},
-				userID:      memberID1,
-				expected:    nil, // 後でセット
-				shouldError: false,
-			},
-			{
-				name:        "異常系: 存在しないユーザーIDで検索",
-				group:       nil,
-				userID:      "non-existent-user-id",
-				expected:    nil,
-				shouldError: true,
-			},
-		}
-
-		for _, tc := range testCases {
-			t.Run(tc.name, func(t *testing.T) {
-				// テストデータのセットアップ
-				if tc.group != nil {
-					_, err := db.Collection("groups").InsertOne(context.Background(), tc.group)
-					assert.NoError(t, err)
-					tc.expected = tc.group
-				}
-
-				// テスト実行
-				foundGroup, err := repo.FindGroupByUserID(tc.userID)
-
-				// 結果の検証
-				if tc.shouldError {
-					assert.Error(t, err)
-					assert.Nil(t, foundGroup)
-				} else {
-					assert.NoError(t, err)
-					assert.NotNil(t, foundGroup)
-					assert.Equal(t, tc.expected.GroupID, foundGroup.GroupID)
-					// 他のフィールドも必要に応じて検証
-				}
-
-				// クリーンアップ
-				if tc.group != nil {
-					_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": tc.group.GroupID})
-					assert.NoError(t, err)
-				}
-			})
-		}
-	})
+	// FindGroupByUserIDのテストケースが削除されました
 
 	t.Run("CreateGroup", func(t *testing.T) {
 		testCases := []struct {
@@ -329,5 +248,117 @@ func TestGroupRepository(t *testing.T) {
 				}
 			})
 		}
+	})
+
+	t.Run("FindGroupsByUserID", func(t *testing.T) {
+		// テストデータ用の定数
+		commonMemberID := entity.UserID("common-member-id")
+		managerID1 := entity.UserID("multi-manager-id-1")
+		managerID2 := entity.UserID("multi-manager-id-2")
+
+		// テスト用のグループデータを作成
+		groups := []*entity.Group{
+			{
+				GroupID:          "multi-group-id-1",
+				GroupName:        "MultiTestGroup1",
+				GroupPassword:    "password111",
+				GroupManagerID:   managerID1,
+				GroupDescription: "Multi test group 1",
+				GroupMembers:     []entity.UserID{commonMemberID, "member2-id-multi1"},
+				GroupEvents:      []entity.EventID{"event1-id-multi1"},
+			},
+			{
+				GroupID:          "multi-group-id-2",
+				GroupName:        "MultiTestGroup2",
+				GroupPassword:    "password222",
+				GroupManagerID:   managerID2,
+				GroupDescription: "Multi test group 2",
+				GroupMembers:     []entity.UserID{commonMemberID, "member2-id-multi2"},
+				GroupEvents:      []entity.EventID{"event1-id-multi2"},
+			},
+			{
+				GroupID:          "multi-group-id-3",
+				GroupName:        "MultiTestGroup3",
+				GroupPassword:    "password333",
+				GroupManagerID:   "another-manager-id",
+				GroupDescription: "Multi test group 3",
+				GroupMembers:     []entity.UserID{"different-member-id", "member2-id-multi3"},
+				GroupEvents:      []entity.EventID{"event1-id-multi3"},
+			},
+		}
+
+		testCases := []struct {
+			name        string
+			userID      entity.UserID
+			expectedIDs []string
+			expectedLen int
+			shouldError bool
+		}{
+			{
+				name:        "正常系: メンバーとして複数グループに所属",
+				userID:      commonMemberID,
+				expectedIDs: []string{"multi-group-id-1", "multi-group-id-2"},
+				expectedLen: 2,
+				shouldError: false,
+			},
+			{
+				name:        "正常系: マネージャーとして所属",
+				userID:      managerID1,
+				expectedIDs: []string{"multi-group-id-1"},
+				expectedLen: 1,
+				shouldError: false,
+			},
+			{
+				name:        "正常系: 所属グループなし",
+				userID:      "non-member-id",
+				expectedIDs: []string{},
+				expectedLen: 0,
+				shouldError: false,
+			},
+		}
+
+		// テストデータをDBに挿入
+		for _, group := range groups {
+			_, err := db.Collection("groups").InsertOne(context.Background(), group)
+			assert.NoError(t, err)
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テスト実行
+				foundGroups, err := repo.FindGroupsByUserID(tc.userID)
+
+				// 結果の検証
+				if tc.shouldError {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tc.expectedLen, len(foundGroups), "Expected %d groups, got %d", tc.expectedLen, len(foundGroups))
+
+					// 取得したグループIDが期待値に含まれているか確認
+					if tc.expectedLen > 0 {
+						foundIDs := make([]string, 0, len(foundGroups))
+						for _, group := range foundGroups {
+							foundIDs = append(foundIDs, string(group.GroupID))
+						}
+
+						for _, expectedID := range tc.expectedIDs {
+							found := false
+							for _, foundID := range foundIDs {
+								if foundID == expectedID {
+									found = true
+									break
+								}
+							}
+							assert.True(t, found, "Expected to find group ID %s but it was not returned", expectedID)
+						}
+					}
+				}
+			})
+		}
+
+		// クリーンアップ
+		_, err := db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": bson.M{"$in": []string{"multi-group-id-1", "multi-group-id-2", "multi-group-id-3"}}})
+		assert.NoError(t, err)
 	})
 }

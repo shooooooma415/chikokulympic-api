@@ -39,11 +39,11 @@ func (gr *GroupRepo) FindGroupByGroupName(groupName *entity.GroupName) (*entity.
 	return &group, nil
 }
 
-func (gr *GroupRepo) FindGroupByUserID(userID entity.UserID) (*entity.Group, error) {
+func (gr *GroupRepo) FindGroupsByUserID(userID entity.UserID) ([]*entity.Group, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var group entity.Group
+	var groups []*entity.Group
 	filter := bson.M{
 		"$or": []bson.M{
 			{"manager_id": userID},
@@ -51,15 +51,21 @@ func (gr *GroupRepo) FindGroupByUserID(userID entity.UserID) (*entity.Group, err
 		},
 	}
 
-	err := gr.groupCollection.FindOne(ctx, filter).Decode(&group)
+	cursor, err := gr.groupCollection.Find(ctx, filter)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("no group found for user ID: %s", userID)
-		}
-		return nil, fmt.Errorf("error finding group by user ID: %w", err)
+		return nil, fmt.Errorf("error finding groups by user ID: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	if err := cursor.All(ctx, &groups); err != nil {
+		return nil, fmt.Errorf("error decoding groups: %w", err)
 	}
 
-	return &group, nil
+	if len(groups) == 0 {
+		return []*entity.Group{}, nil // 空の配列を返す（nilではなく）
+	}
+
+	return groups, nil
 }
 
 func (gr *GroupRepo) CreateGroup(group *entity.Group) (*entity.Group, error) {
