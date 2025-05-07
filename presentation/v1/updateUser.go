@@ -2,6 +2,7 @@ package v1
 
 import (
 	"chikokulympic-api/domain/entity"
+	"chikokulympic-api/domain/repository"
 	"chikokulympic-api/middleware"
 	"chikokulympic-api/usecase"
 	"net/http"
@@ -19,14 +20,15 @@ type UpdateUserResponse struct {
 }
 
 type UpdateUser struct {
-	usecase.UpdateUserUseCase
+	userRepo repository.UserRepository
 }
 
-func NewUpdateUser(usecase usecase.UpdateUserUseCase) *UpdateUser {
+func NewUpdateUser(userRepo repository.UserRepository) *UpdateUser {
 	return &UpdateUser{
-		UpdateUserUseCase: usecase,
+		userRepo: userRepo,
 	}
 }
+
 func (u *UpdateUser) Handler(c echo.Context) error {
 	req := new(UpdateUserRequest)
 	if err := c.Bind(req); err != nil {
@@ -42,7 +44,7 @@ func (u *UpdateUser) Handler(c echo.Context) error {
 		UserIcon: entity.UserIcon(req.UserIcon),
 	}
 
-	updatedUser, err := u.Execute(user)
+	updatedUser, err := usecase.NewUpdateUserUseCase(u.userRepo, user).Execute()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, middleware.NewErrorResponse(err.Error()))
 	}

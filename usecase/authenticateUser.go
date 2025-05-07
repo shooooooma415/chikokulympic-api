@@ -6,19 +6,21 @@ import (
 )
 
 type AuthenticateUserUseCase interface {
-	Execute(authID entity.AuthID) (*entity.User, error)
+	Execute() (*entity.User, error)
 }
 
 type AuthenticateUserUseCaseImpl struct {
 	userRepo repository.UserRepository
+	authID   entity.AuthID
 }
 
-func NewAuthenticateUserUseCase(userRepo repository.UserRepository) *AuthenticateUserUseCaseImpl {
+func NewAuthenticateUserUseCase(userRepo repository.UserRepository, authID entity.AuthID) *AuthenticateUserUseCaseImpl {
 	return &AuthenticateUserUseCaseImpl{
 		userRepo: userRepo,
+		authID:   authID,
 	}
 }
 
-func (uc *AuthenticateUserUseCaseImpl) Execute(authID entity.AuthID) (*entity.User, error) {
-	return uc.userRepo.FindUserByAuthID(authID)
+func (uc *AuthenticateUserUseCaseImpl) Execute() (*entity.User, error) {
+	return uc.userRepo.FindUserByAuthID(uc.authID)
 }

@@ -8,22 +8,24 @@ import (
 )
 
 type RegisterUserUseCase interface {
-	Execute(user *entity.User) (*entity.User, error)
+	Execute() (*entity.User, error)
 }
 
 type RegisterUserUseCaseImpl struct {
 	userRepo repository.UserRepository
+	user     *entity.User
 }
 
-func NewRegisterUserUseCase(userRepo repository.UserRepository) *RegisterUserUseCaseImpl {
+func NewRegisterUserUseCase(userRepo repository.UserRepository, user *entity.User) *RegisterUserUseCaseImpl {
 	return &RegisterUserUseCaseImpl{
 		userRepo: userRepo,
+		user:     user,
 	}
 }
 
-func (uc *RegisterUserUseCaseImpl) Execute(user *entity.User) (*entity.User, error) {
+func (uc *RegisterUserUseCaseImpl) Execute() (*entity.User, error) {
 	userID := uuid.New().String()
-	user.UserID = entity.UserID(userID)
+	uc.user.UserID = entity.UserID(userID)
 
-	return uc.userRepo.CreateUser(user)
+	return uc.userRepo.CreateUser(uc.user)
 }

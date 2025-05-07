@@ -12,219 +12,353 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func TestFindGroupByGroupName(t *testing.T) {
+func TestGroupRepository(t *testing.T) {
+	// 各テストで共通のセットアップ処理
 	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
-
-	testGroup := &entity.Group{
-		GroupID:          "test-group-id",
-		GroupName:        "TestGroup",
-		GroupPassword:    "password123",
-		GroupManagerID:   "manager-user-id",
-		GroupDescription: "Test group description",
-		GroupMembers:     []entity.UserID{"member1-id", "member2-id"},
-		GroupEvents:      []entity.EventID{"event1-id", "event2-id"},
-	}
-
-	_, err := db.Collection("groups").InsertOne(context.Background(), testGroup)
-	assert.NoError(t, err)
-
 	repo := repository.NewGroupRepo(db)
 
-	foundGroup, err := repo.FindGroupByGroupName(&testGroup.GroupName)
+	t.Run("FindGroupByGroupName", func(t *testing.T) {
+		testCases := []struct {
+			name        string
+			group       *entity.Group
+			groupName   entity.GroupName
+			expected    *entity.Group
+			shouldError bool
+		}{
+			{
+				name: "正常系: 存在するグループ名で検索",
+				group: &entity.Group{
+					GroupID:          "test-group-id-1",
+					GroupName:        "TestGroup1",
+					GroupPassword:    "password123",
+					GroupManagerID:   "manager-user-id-1",
+					GroupDescription: "Test group description 1",
+					GroupMembers:     []entity.UserID{"member1-id", "member2-id"},
+					GroupEvents:      []entity.EventID{"event1-id", "event2-id"},
+				},
+				groupName:   "TestGroup1",
+				expected:    nil, // 後でセット
+				shouldError: false,
+			},
+			{
+				name:        "異常系: 存在しないグループ名で検索",
+				group:       nil,
+				groupName:   "NonExistentGroup",
+				expected:    nil,
+				shouldError: true,
+			},
+		}
 
-	assert.NoError(t, err)
-	assert.NotNil(t, foundGroup)
-	assert.Equal(t, testGroup.GroupID, foundGroup.GroupID)
-	assert.Equal(t, testGroup.GroupName, foundGroup.GroupName)
-	assert.Equal(t, testGroup.GroupManagerID, foundGroup.GroupManagerID)
-}
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				if tc.group != nil {
+					_, err := db.Collection("groups").InsertOne(context.Background(), tc.group)
+					assert.NoError(t, err)
+					tc.expected = tc.group
+				}
 
-func TestFindGroupByUserID(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+				// テスト実行
+				foundGroup, err := repo.FindGroupByGroupName(&tc.groupName)
 
-	managerID := entity.UserID("manager-user-id")
-	memberID := entity.UserID("member1-id")
+				// 結果の検証
+				if tc.shouldError {
+					assert.Error(t, err)
+					assert.Nil(t, foundGroup)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, foundGroup)
+					assert.Equal(t, tc.expected.GroupID, foundGroup.GroupID)
+					assert.Equal(t, tc.expected.GroupName, foundGroup.GroupName)
+					assert.Equal(t, tc.expected.GroupManagerID, foundGroup.GroupManagerID)
+				}
 
-	testGroup := &entity.Group{
-		GroupID:          "test-group-id",
-		GroupName:        "TestGroup",
-		GroupPassword:    "password123",
-		GroupManagerID:   managerID,
-		GroupDescription: "Test group description",
-		GroupMembers:     []entity.UserID{memberID, "member2-id"},
-		GroupEvents:      []entity.EventID{"event1-id", "event2-id"},
-	}
+				// クリーンアップ
+				if tc.group != nil {
+					_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_name": tc.group.GroupName})
+					assert.NoError(t, err)
+				}
+			})
+		}
+	})
 
-	_, err := db.Collection("groups").InsertOne(context.Background(), testGroup)
-	assert.NoError(t, err)
+	// FindGroupByUserIDのテストケースが削除されました
 
-	repo := repository.NewGroupRepo(db)
+	t.Run("CreateGroup", func(t *testing.T) {
+		testCases := []struct {
+			name        string
+			group       *entity.Group
+			shouldError bool
+		}{
+			{
+				name: "正常系: 新規グループ作成",
+				group: &entity.Group{
+					GroupID:          "new-group-id",
+					GroupName:        "NewGroup",
+					GroupPassword:    "newpassword",
+					GroupManagerID:   "new-manager-id",
+					GroupDescription: "New group description",
+					GroupMembers:     []entity.UserID{"new-member1-id", "new-member2-id"},
+					GroupEvents:      []entity.EventID{"new-event1-id", "new-event2-id"},
+				},
+				shouldError: false,
+			},
+			// 必要に応じて異常系のテストケースを追加
+		}
 
-	// マネージャーIDでの検索テスト
-	foundGroup, err := repo.FindGroupByUserID(managerID)
-	assert.NoError(t, err)
-	assert.NotNil(t, foundGroup)
-	assert.Equal(t, testGroup.GroupID, foundGroup.GroupID)
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テスト実行
+				createdGroup, err := repo.CreateGroup(tc.group)
 
-	// メンバーIDでの検索テスト
-	foundGroup, err = repo.FindGroupByUserID(memberID)
-	assert.NoError(t, err)
-	assert.NotNil(t, foundGroup)
-	assert.Equal(t, testGroup.GroupID, foundGroup.GroupID)
-}
+				// 結果の検証
+				if tc.shouldError {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, createdGroup)
+					assert.Equal(t, tc.group.GroupID, createdGroup.GroupID)
+					assert.Equal(t, tc.group.GroupName, createdGroup.GroupName)
 
-func TestCreateGroup(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+					// DBに保存されていることを確認
+					var savedGroup entity.Group
+					err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": tc.group.GroupID}).Decode(&savedGroup)
+					assert.NoError(t, err)
+					assert.Equal(t, tc.group.GroupName, savedGroup.GroupName)
+					assert.Equal(t, tc.group.GroupDescription, savedGroup.GroupDescription)
+				}
 
-	repo := repository.NewGroupRepo(db)
+				// クリーンアップ
+				_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": tc.group.GroupID})
+				assert.NoError(t, err)
+			})
+		}
+	})
 
-	testGroup := &entity.Group{
-		GroupID:          "new-group-id",
-		GroupName:        "NewGroup",
-		GroupPassword:    "newpassword",
-		GroupManagerID:   "new-manager-id",
-		GroupDescription: "New group description",
-		GroupMembers:     []entity.UserID{"new-member1-id", "new-member2-id"},
-		GroupEvents:      []entity.EventID{"new-event1-id", "new-event2-id"},
-	}
+	t.Run("UpdateGroup", func(t *testing.T) {
+		testCases := []struct {
+			name         string
+			initialGroup *entity.Group
+			updatedGroup *entity.Group
+			shouldError  bool
+		}{
+			{
+				name: "正常系: グループ情報更新",
+				initialGroup: &entity.Group{
+					GroupID:          "update-group-id",
+					GroupName:        "UpdateGroup",
+					GroupPassword:    "updatepassword",
+					GroupManagerID:   "update-manager-id",
+					GroupDescription: "Update group description",
+					GroupMembers:     []entity.UserID{"update-member1-id", "update-member2-id"},
+					GroupEvents:      []entity.EventID{"update-event1-id", "update-event2-id"},
+				},
+				updatedGroup: &entity.Group{
+					GroupID:          "update-group-id",
+					GroupName:        "UpdateGroup",
+					GroupPassword:    "updatepassword",
+					GroupManagerID:   "update-manager-id",
+					GroupDescription: "Updated group description",
+					GroupMembers:     []entity.UserID{"update-member1-id", "update-member2-id", "update-member3-id"},
+					GroupEvents:      []entity.EventID{"update-event1-id", "update-event2-id"},
+				},
+				shouldError: false,
+			},
+			// 必要に応じて異常系のテストケースを追加
+		}
 
-	createdGroup, err := repo.CreateGroup(testGroup)
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				_, err := db.Collection("groups").InsertOne(context.Background(), tc.initialGroup)
+				assert.NoError(t, err)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, createdGroup)
-	assert.Equal(t, testGroup.GroupID, createdGroup.GroupID)
-	assert.Equal(t, testGroup.GroupName, createdGroup.GroupName)
+				// テスト実行
+				updatedGroup, err := repo.UpdateGroup(tc.updatedGroup)
 
-	var savedGroup entity.Group
-	err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": testGroup.GroupID}).Decode(&savedGroup)
-	assert.NoError(t, err)
-	assert.Equal(t, testGroup.GroupName, savedGroup.GroupName)
-	assert.Equal(t, testGroup.GroupDescription, savedGroup.GroupDescription)
-}
+				// 結果の検証
+				if tc.shouldError {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, updatedGroup)
+					assert.Equal(t, tc.updatedGroup.GroupDescription, updatedGroup.GroupDescription)
+					assert.Equal(t, len(tc.updatedGroup.GroupMembers), len(updatedGroup.GroupMembers))
 
-func TestCreateGroupDuplicate(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+					// DBから直接取得して確認
+					var savedGroup entity.Group
+					err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": tc.initialGroup.GroupID}).Decode(&savedGroup)
+					assert.NoError(t, err)
+					assert.Equal(t, tc.updatedGroup.GroupDescription, savedGroup.GroupDescription)
+					assert.Equal(t, len(tc.updatedGroup.GroupMembers), len(savedGroup.GroupMembers))
+				}
 
-	repo := repository.NewGroupRepo(db)
+				// クリーンアップ
+				_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": tc.initialGroup.GroupID})
+				assert.NoError(t, err)
+			})
+		}
+	})
 
-	testGroup := &entity.Group{
-		GroupID:          "existing-group-id",
-		GroupName:        "ExistingGroup",
-		GroupPassword:    "password123",
-		GroupManagerID:   "manager-id",
-		GroupDescription: "Existing group description",
-		GroupMembers:     []entity.UserID{"member1-id", "member2-id"},
-		GroupEvents:      []entity.EventID{"event1-id", "event2-id"},
-	}
+	t.Run("DeleteGroup", func(t *testing.T) {
+		testCases := []struct {
+			name        string
+			group       *entity.Group
+			shouldError bool
+		}{
+			{
+				name: "正常系: グループ削除",
+				group: &entity.Group{
+					GroupID:          "delete-group-id",
+					GroupName:        "DeleteGroup",
+					GroupPassword:    "deletepassword",
+					GroupManagerID:   "delete-manager-id",
+					GroupDescription: "Delete group description",
+					GroupMembers:     []entity.UserID{"delete-member1-id", "delete-member2-id"},
+					GroupEvents:      []entity.EventID{"delete-event1-id", "delete-event2-id"},
+				},
+				shouldError: false,
+			},
+			// 必要に応じて異常系のテストケースを追加
+		}
 
-	// 最初のグループ作成
-	_, err := repo.CreateGroup(testGroup)
-	assert.NoError(t, err)
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				_, err := db.Collection("groups").InsertOne(context.Background(), tc.group)
+				assert.NoError(t, err)
 
-	// 同じ名前で再度作成を試みる
-	duplicateGroup := &entity.Group{
-		GroupID:          "another-group-id",
-		GroupName:        testGroup.GroupName, // 同じ名前
-		GroupPassword:    "anotherpassword",
-		GroupManagerID:   "another-manager-id",
-		GroupDescription: "Another group description",
-	}
+				// テスト実行
+				deletedGroup, err := repo.DeleteGroup(tc.group)
 
-	_, err = repo.CreateGroup(duplicateGroup)
-	assert.Error(t, err) // エラーが返されることを期待
-}
+				// 結果の検証
+				if tc.shouldError {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, deletedGroup)
+					assert.Equal(t, tc.group.GroupID, deletedGroup.GroupID)
 
-func TestUpdateGroup(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
+					// DBから削除されたことを確認
+					var count int64
+					count, err = db.Collection("groups").CountDocuments(context.Background(), bson.M{"group_id": tc.group.GroupID})
+					assert.NoError(t, err)
+					assert.Equal(t, int64(0), count)
+				}
+			})
+		}
+	})
 
-	testGroup := &entity.Group{
-		GroupID:          "update-group-id",
-		GroupName:        "UpdateGroup",
-		GroupPassword:    "updatepassword",
-		GroupManagerID:   "update-manager-id",
-		GroupDescription: "Update group description",
-		GroupMembers:     []entity.UserID{"update-member1-id", "update-member2-id"},
-		GroupEvents:      []entity.EventID{"update-event1-id", "update-event2-id"},
-	}
+	t.Run("FindGroupsByUserID", func(t *testing.T) {
+		// テストデータ用の定数
+		commonMemberID := entity.UserID("common-member-id")
+		managerID1 := entity.UserID("multi-manager-id-1")
+		managerID2 := entity.UserID("multi-manager-id-2")
 
-	_, err := db.Collection("groups").InsertOne(context.Background(), testGroup)
-	assert.NoError(t, err)
+		// テスト用のグループデータを作成
+		groups := []*entity.Group{
+			{
+				GroupID:          "multi-group-id-1",
+				GroupName:        "MultiTestGroup1",
+				GroupPassword:    "password111",
+				GroupManagerID:   managerID1,
+				GroupDescription: "Multi test group 1",
+				GroupMembers:     []entity.UserID{commonMemberID, "member2-id-multi1"},
+				GroupEvents:      []entity.EventID{"event1-id-multi1"},
+			},
+			{
+				GroupID:          "multi-group-id-2",
+				GroupName:        "MultiTestGroup2",
+				GroupPassword:    "password222",
+				GroupManagerID:   managerID2,
+				GroupDescription: "Multi test group 2",
+				GroupMembers:     []entity.UserID{commonMemberID, "member2-id-multi2"},
+				GroupEvents:      []entity.EventID{"event1-id-multi2"},
+			},
+			{
+				GroupID:          "multi-group-id-3",
+				GroupName:        "MultiTestGroup3",
+				GroupPassword:    "password333",
+				GroupManagerID:   "another-manager-id",
+				GroupDescription: "Multi test group 3",
+				GroupMembers:     []entity.UserID{"different-member-id", "member2-id-multi3"},
+				GroupEvents:      []entity.EventID{"event1-id-multi3"},
+			},
+		}
 
-	repo := repository.NewGroupRepo(db)
+		testCases := []struct {
+			name        string
+			userID      entity.UserID
+			expectedIDs []string
+			expectedLen int
+			shouldError bool
+		}{
+			{
+				name:        "正常系: メンバーとして複数グループに所属",
+				userID:      commonMemberID,
+				expectedIDs: []string{"multi-group-id-1", "multi-group-id-2"},
+				expectedLen: 2,
+				shouldError: false,
+			},
+			{
+				name:        "正常系: マネージャーとして所属",
+				userID:      managerID1,
+				expectedIDs: []string{"multi-group-id-1"},
+				expectedLen: 1,
+				shouldError: false,
+			},
+			{
+				name:        "正常系: 所属グループなし",
+				userID:      "non-member-id",
+				expectedIDs: []string{},
+				expectedLen: 0,
+				shouldError: false,
+			},
+		}
 
-	// グループ情報の更新
-	updatedDescription := entity.GroupDescription("Updated group description")
-	updatedMembers := entity.GroupMembers{"update-member1-id", "update-member2-id", "update-member3-id"}
+		// テストデータをDBに挿入
+		for _, group := range groups {
+			_, err := db.Collection("groups").InsertOne(context.Background(), group)
+			assert.NoError(t, err)
+		}
 
-	testGroup.GroupDescription = updatedDescription
-	testGroup.GroupMembers = updatedMembers
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テスト実行
+				foundGroups, err := repo.FindGroupsByUserID(tc.userID)
 
-	updatedGroup, err := repo.UpdateGroup(testGroup)
+				// 結果の検証
+				if tc.shouldError {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, tc.expectedLen, len(foundGroups), "Expected %d groups, got %d", tc.expectedLen, len(foundGroups))
 
-	assert.NoError(t, err)
-	assert.NotNil(t, updatedGroup)
-	assert.Equal(t, updatedDescription, updatedGroup.GroupDescription)
-	assert.Equal(t, len(updatedMembers), len(updatedGroup.GroupMembers))
+					// 取得したグループIDが期待値に含まれているか確認
+					if tc.expectedLen > 0 {
+						foundIDs := make([]string, 0, len(foundGroups))
+						for _, group := range foundGroups {
+							foundIDs = append(foundIDs, string(group.GroupID))
+						}
 
-	// DBから直接取得して確認
-	var savedGroup entity.Group
-	err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": testGroup.GroupID}).Decode(&savedGroup)
-	assert.NoError(t, err)
-	assert.Equal(t, updatedDescription, savedGroup.GroupDescription)
-	assert.Equal(t, len(updatedMembers), len(savedGroup.GroupMembers))
-}
+						for _, expectedID := range tc.expectedIDs {
+							found := false
+							for _, foundID := range foundIDs {
+								if foundID == expectedID {
+									found = true
+									break
+								}
+							}
+							assert.True(t, found, "Expected to find group ID %s but it was not returned", expectedID)
+						}
+					}
+				}
+			})
+		}
 
-func TestDeleteGroup(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
-
-	testGroup := &entity.Group{
-		GroupID:          "delete-group-id",
-		GroupName:        "DeleteGroup",
-		GroupPassword:    "deletepassword",
-		GroupManagerID:   "delete-manager-id",
-		GroupDescription: "Delete group description",
-		GroupMembers:     []entity.UserID{"delete-member1-id", "delete-member2-id"},
-		GroupEvents:      []entity.EventID{"delete-event1-id", "delete-event2-id"},
-	}
-
-	_, err := db.Collection("groups").InsertOne(context.Background(), testGroup)
-	assert.NoError(t, err)
-
-	repo := repository.NewGroupRepo(db)
-
-	deletedGroup, err := repo.DeleteGroup(testGroup)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, deletedGroup)
-	assert.Equal(t, testGroup.GroupID, deletedGroup.GroupID)
-
-	var count int64
-	count, err = db.Collection("groups").CountDocuments(context.Background(), bson.M{"group_id": testGroup.GroupID})
-	assert.NoError(t, err)
-	assert.Equal(t, int64(0), count)
-}
-
-func TestFindGroupNotFound(t *testing.T) {
-	db, cleanup := testUtils.SetupTestDB(t)
-	defer cleanup()
-
-	repo := repository.NewGroupRepo(db)
-
-	nonExistentName := entity.GroupName("NonExistentGroup")
-	group, err := repo.FindGroupByGroupName(&nonExistentName)
-
-	assert.Error(t, err)
-	assert.Nil(t, group)
-
-	nonExistentUserID := entity.UserID("non-existent-user-id")
-	group, err = repo.FindGroupByUserID(nonExistentUserID)
-
-	assert.Error(t, err)
-	assert.Nil(t, group)
+		// クリーンアップ
+		_, err := db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": bson.M{"$in": []string{"multi-group-id-1", "multi-group-id-2", "multi-group-id-3"}}})
+		assert.NoError(t, err)
+	})
 }

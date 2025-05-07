@@ -2,6 +2,7 @@ package v1
 
 import (
 	"chikokulympic-api/domain/entity"
+	"chikokulympic-api/domain/repository"
 	"chikokulympic-api/middleware"
 	"chikokulympic-api/usecase"
 	"net/http"
@@ -21,12 +22,12 @@ type SignupResponse struct {
 }
 
 type Signup struct {
-	usecase.RegisterUserUseCase
+	userRepo repository.UserRepository
 }
 
-func NewSignup(usecase usecase.RegisterUserUseCase) *Signup {
+func NewSignup(userRepo repository.UserRepository) *Signup {
 	return &Signup{
-		RegisterUserUseCase: usecase,
+		userRepo: userRepo,
 	}
 }
 
@@ -47,7 +48,7 @@ func (s *Signup) Handler(c echo.Context) error {
 		UserIcon: entity.UserIcon(req.UserIcon),
 	}
 
-	registeredUser, err := s.Execute(user)
+	registeredUser, err := usecase.NewRegisterUserUseCase(s.userRepo, user).Execute()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, middleware.NewErrorResponse(err.Error()))
 	}

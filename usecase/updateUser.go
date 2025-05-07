@@ -6,19 +6,21 @@ import (
 )
 
 type UpdateUserUseCase interface {
-	Execute(user *entity.User) (*entity.User, error)
+	Execute() (*entity.User, error)
 }
 
 type UpdateUserUseCaseImpl struct {
 	userRepo repository.UserRepository
+	user     *entity.User
 }
 
-func NewUpdateUserUseCase(userRepo repository.UserRepository) *UpdateUserUseCaseImpl {
+func NewUpdateUserUseCase(userRepo repository.UserRepository, user *entity.User) *UpdateUserUseCaseImpl {
 	return &UpdateUserUseCaseImpl{
 		userRepo: userRepo,
+		user:     user,
 	}
 }
 
-func (uc *UpdateUserUseCaseImpl) Execute(user *entity.User) (*entity.User, error) {
-	return uc.userRepo.UpdateUser(user)
+func (uc *UpdateUserUseCaseImpl) Execute() (*entity.User, error) {
+	return uc.userRepo.UpdateUser(uc.user)
 }

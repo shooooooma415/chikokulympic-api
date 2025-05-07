@@ -1,8 +1,8 @@
 package v1
 
 import (
+	"chikokulympic-api/domain/repository"
 	presentationV1 "chikokulympic-api/presentation/v1"
-	"chikokulympic-api/usecase"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,15 +13,11 @@ type AuthServer struct {
 	updateUser *presentationV1.UpdateUser
 }
 
-func NewAuthServer(
-	registerUserUseCase usecase.RegisterUserUseCase,
-	authenticateUserUseCase usecase.AuthenticateUserUseCase,
-	updateUserUseCase usecase.UpdateUserUseCase,
-) *AuthServer {
+func NewAuthServer(userRepo repository.UserRepository) *AuthServer {
 	return &AuthServer{
-		signup:     presentationV1.NewSignup(registerUserUseCase),
-		signin:     presentationV1.NewSignin(authenticateUserUseCase),
-		updateUser: presentationV1.NewUpdateUser(updateUserUseCase),
+		signup:     presentationV1.NewSignup(userRepo),
+		signin:     presentationV1.NewSignin(userRepo),
+		updateUser: presentationV1.NewUpdateUser(userRepo),
 	}
 }
 
