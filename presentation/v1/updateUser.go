@@ -11,12 +11,12 @@ import (
 )
 
 type UpdateUserRequest struct {
-	UserName string `json:"user_name"`
-	UserIcon string `json:"user_icon"`
+	UserName entity.UserName `json:"user_name"`
+	UserIcon entity.UserIcon `json:"user_icon"`
 }
 
 type UpdateUserResponse struct {
-	UserID string `json:"user_id"`
+	UserID entity.UserID `json:"user_id"`
 }
 
 type UpdateUser struct {
@@ -50,7 +50,7 @@ func (u *UpdateUser) Handler(c echo.Context) error {
 	}
 
 	response := UpdateUserResponse{
-		UserID: string(updatedUser.UserID),
+		UserID: updatedUser.UserID,
 	}
 
 	return c.JSON(http.StatusOK, response)
