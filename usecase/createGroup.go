@@ -27,17 +27,18 @@ func NewCreateGroupUseCase(groupRepo repository.GroupRepository, userRepo reposi
 func (uc *CreateGroupUseCaseImpl) Execute() (*entity.Group, error) {
 	user, err := uc.userRepo.FindUserByUserID(uc.group.GroupManagerID)
 	if err != nil {
-		return nil, fmt.Errorf("ユーザーの取得に失敗しました: %v", err)
+		return nil, fmt.Errorf("ユーザー検索中にエラーが発生しました: %v", err)
 	}
 	if user == nil {
-		return nil, fmt.Errorf("指定されたユーザーID %s が存在しません", err)
+		return nil, fmt.Errorf("指定されたユーザーID %s が存在しません", string(uc.group.GroupManagerID))
 	}
 
-	// グループ名の重複チェック
 	existingGroup, err := uc.groupRepo.FindGroupByGroupName(&uc.group.GroupName)
 	if err == nil && existingGroup != nil {
 		return nil, fmt.Errorf("グループ名 '%s' は既に使用されています", string(uc.group.GroupName))
 	}
+
+	uc.group.GroupMembers = append(uc.group.GroupMembers, uc.group.GroupManagerID)
 
 	return uc.groupRepo.CreateGroup(uc.group)
 }
