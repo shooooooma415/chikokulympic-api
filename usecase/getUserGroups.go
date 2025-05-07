@@ -5,7 +5,7 @@ import (
 	"chikokulympic-api/domain/repository"
 )
 
-type GroupResponse struct {
+type GroupInfo struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	MemberCount int    `json:"member_count"`
@@ -13,7 +13,7 @@ type GroupResponse struct {
 }
 
 type GetUserGroupsResponse struct {
-	Groups []GroupResponse `json:"groups"`
+	Groups []GroupInfo `json:"groups"`
 }
 
 type GetUserGroupsUseCase interface {
@@ -39,7 +39,7 @@ func (uc *GetUserGroupsUseCaseImpl) Execute() (*GetUserGroupsResponse, error) {
 	}
 
 	result := &GetUserGroupsResponse{
-		Groups: make([]GroupResponse, 0, len(groups)),
+		Groups: make([]GroupInfo, 0, len(groups)),
 	}
 
 	for _, group := range groups {
@@ -50,7 +50,7 @@ func (uc *GetUserGroupsUseCaseImpl) Execute() (*GetUserGroupsResponse, error) {
 
 		isCreator := group.GroupManagerID == uc.userID
 
-		groupResponse := GroupResponse{
+		groupResponse := GroupInfo{
 			ID:          string(group.GroupID),
 			Name:        string(group.GroupName),
 			MemberCount: memberCount,
