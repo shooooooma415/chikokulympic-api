@@ -3,35 +3,43 @@ package main
 import (
 	"context"
 	"net/http"
-	"os"
+
+	"chikokulympic-api/config"
+	"chikokulympic-api/infrastructure/mongo/repository"
+	serverV1 "chikokulympic-api/server/v1"
 
 	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	uri := os.Getenv("MONGO_URI")
+	config.LoadEnvFileOrDefault(".env.local")
+
+	uri := config.GetRequiredEnv("MONGO_URI")
+	dbName := config.GetRequiredEnv("MONGO_DATABASE")
+
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		panic(err)
 	}
+	defer client.Disconnect(context.TODO())
 
-	db := client.Database("chikokulympic_prod")
-	collection := db.Collection("hoge")
+	db := client.Database(dbName)
 
 	e := echo.New()
 
 	e.GET("/", func(c echo.Context) error {
-		var result bson.M
-		err := collection.FindOne(context.TODO(), bson.M{}).Decode(&result)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-		}
-
-		return c.JSON(http.StatusOK, result)
+		return c.JSON(http.StatusOK, map[string]string{"message": "Hello Chikokulympic-api"})
 	})
 
-	e.Start(":8080")
+	// リポジトリの初期化
+	userRepo := repository.NewUserRepository(db)
+
+	// サーバーの初期化とルーティング設定
+	authServer := serverV1.NewAuthServer(userRepo)
+	authServer.RegisterRoutes(e)
+
+	port := config.GetEnvWithDefault("PORT", "8080")
+	e.Start(":" + port)
 }
