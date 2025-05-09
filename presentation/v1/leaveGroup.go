@@ -11,8 +11,7 @@ import (
 )
 
 type LeaveGroupRequest struct {
-	GroupName entity.GroupName `json:"group_name" validate:"required"`
-	UserID    entity.UserID    `json:"user_id" validate:"required"`
+	UserID entity.UserID `json:"user_id" validate:"required"`
 }
 
 type LeaveGroup struct {
@@ -26,23 +25,27 @@ func NewLeaveGroup(groupRepo repository.GroupRepository) *LeaveGroup {
 }
 
 func (l *LeaveGroup) Handler(c echo.Context) error {
+	// パスパラメータからgroup_idを取得
+	groupIDParam := c.Param("group_id")
+	if groupIDParam == "" {
+		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse("グループIDは必須です"))
+	}
+
+	// リクエストボディからユーザーIDを取得
 	req := new(LeaveGroupRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse(err.Error()))
 	}
 
 	// バリデーション
-	if req.GroupName == "" || req.UserID == "" {
-		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse("グループ名とユーザーIDは必須です"))
+	if req.UserID == "" {
+		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse("ユーザーIDは必須です"))
 	}
 
-	group := &entity.Group{
-		GroupName: req.GroupName,
-	}
-
+	groupID := entity.GroupID(groupIDParam)
 	userID := entity.UserID(req.UserID)
 
-	err := usecase.NewLeaveGroupUseCase(l.groupRepo, userID, *group).Execute()
+	err := usecase.NewLeaveGroupUseCase(l.groupRepo, userID, groupID).Execute()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, middleware.NewErrorResponse(err.Error()))
 	}
