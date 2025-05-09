@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 type GetUserGroups struct {
 	groupRepo repository.GroupRepository
 }
@@ -30,7 +29,7 @@ func (g *GetUserGroups) Handler(c echo.Context) error {
 
 	userID := entity.UserID(userIDParam)
 
-	result, err := usecase.NewGetUserGroupsUseCase(g.groupRepo, userID).Execute()
+	result, err := usecase.NewFetchUserGroupsUseCase(g.groupRepo, userID).Execute()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, middleware.NewErrorResponse(err.Error()))
 	}
