@@ -7,16 +7,17 @@ import (
 )
 
 type Member struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Icon string `json:"icon"`
+	ID   entity.UserID   `json:"id"`
+	Name entity.UserName `json:"name"`
+	Icon entity.UserIcon `json:"icon"`
 }
 
 type GroupInfoResponse struct {
-	GroupName string   `json:"group_name"`
-	Password  string   `json:"password"`
-	Members   []Member `json:"members"`
-} 
+	GroupName      entity.GroupName     `json:"group_name"`
+	Password       entity.GroupPassword `json:"password"`
+	Members        []Member             `json:"members"`
+	GroupManagerID entity.UserID        `json:"group_manager_id"`
+}
 
 type FetchGroupInfoUsecase struct {
 	groupRepo repository.GroupRepository
@@ -31,8 +32,7 @@ func NewFetchGroupInfoUsecase(groupRepo repository.GroupRepository, userRepo rep
 }
 
 func (u *FetchGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoResponse, error) {
-	groupName := entity.GroupName(groupID)
-	group, err := u.groupRepo.FindGroupByGroupName(&groupName)
+	group, err := u.groupRepo.FindGroupByGroupID(groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,9 +55,9 @@ func (u *FetchGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoRespo
 			mu.Lock()
 			defer mu.Unlock()
 			members = append(members, Member{
-				ID:   string(user.UserID),
-				Name: string(user.UserName),
-				Icon: string(user.UserIcon),
+				ID:   user.UserID,
+				Name: user.UserName,
+				Icon: user.UserIcon,
 			})
 		}(memberID)
 	}
@@ -65,9 +65,10 @@ func (u *FetchGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoRespo
 	wg.Wait()
 
 	response := &GroupInfoResponse{
-		GroupName: string(group.GroupName),
-		Password:  string(group.GroupPassword),
-		Members:   members,
+		GroupName:      group.GroupName,
+		Password:       group.GroupPassword,
+		Members:        members,
+		GroupManagerID: group.GroupManagerID,
 	}
 
 	return response, nil
