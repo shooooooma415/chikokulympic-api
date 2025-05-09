@@ -13,19 +13,19 @@ type LeaveGroupUseCase interface {
 type LeaveGroupUseCaseImpl struct {
 	groupRepo repository.GroupRepository
 	userID    entity.UserID
-	group     entity.Group
+	groupID   entity.GroupID
 }
 
-func NewLeaveGroupUseCase(groupRepo repository.GroupRepository, userID entity.UserID, group entity.Group) *LeaveGroupUseCaseImpl {
+func NewLeaveGroupUseCase(groupRepo repository.GroupRepository, userID entity.UserID, groupID entity.GroupID) *LeaveGroupUseCaseImpl {
 	return &LeaveGroupUseCaseImpl{
 		groupRepo: groupRepo,
 		userID:    userID,
-		group:     group,
+		groupID:   groupID,
 	}
 }
 
 func (uc *LeaveGroupUseCaseImpl) Execute() error {
-	groupFound, err := uc.groupRepo.FindGroupByGroupName(&uc.group.GroupName)
+	groupFound, err := uc.groupRepo.FindGroupByGroupID(uc.groupID)
 	if err != nil {
 		return err
 	}
