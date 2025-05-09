@@ -16,21 +16,21 @@ type GroupInfoResponse struct {
 	GroupName string   `json:"group_name"`
 	Password  string   `json:"password"`
 	Members   []Member `json:"members"`
-}
+} 
 
-type GetGroupInfoUsecase struct {
+type FetchGroupInfoUsecase struct {
 	groupRepo repository.GroupRepository
 	userRepo  repository.UserRepository
 }
 
-func NewGetGroupInfoUsecase(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *GetGroupInfoUsecase {
-	return &GetGroupInfoUsecase{
+func NewFetchGroupInfoUsecase(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *FetchGroupInfoUsecase {
+	return &FetchGroupInfoUsecase{
 		groupRepo: groupRepo,
 		userRepo:  userRepo,
 	}
 }
 
-func (u *GetGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoResponse, error) {
+func (u *FetchGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoResponse, error) {
 	groupName := entity.GroupName(groupID)
 	group, err := u.groupRepo.FindGroupByGroupName(&groupName)
 	if err != nil {

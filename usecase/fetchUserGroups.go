@@ -12,33 +12,33 @@ type GroupResponse struct {
 	IsCreator   bool   `json:"is_creator"`
 }
 
-type GetUserGroupsResponse struct {
+type FetchUserGroupsResponse struct {
 	Groups []GroupResponse `json:"groups"`
 }
 
-type GetUserGroupsUseCase interface {
-	Execute() (*GetUserGroupsResponse, error)
+type FetchUserGroupsUseCase interface {
+	Execute() (*FetchUserGroupsResponse, error)
 }
 
-type GetUserGroupsUseCaseImpl struct {
+type FetchUserGroupsUseCaseImpl struct {
 	groupRepo repository.GroupRepository
 	userID    entity.UserID
 }
 
-func NewGetUserGroupsUseCase(groupRepo repository.GroupRepository, userID entity.UserID) *GetUserGroupsUseCaseImpl {
-	return &GetUserGroupsUseCaseImpl{
+func NewFetchUserGroupsUseCase(groupRepo repository.GroupRepository, userID entity.UserID) *FetchUserGroupsUseCaseImpl {
+	return &FetchUserGroupsUseCaseImpl{
 		groupRepo: groupRepo,
 		userID:    userID,
 	}
 }
 
-func (uc *GetUserGroupsUseCaseImpl) Execute() (*GetUserGroupsResponse, error) {
+func (uc *FetchUserGroupsUseCaseImpl) Execute() (*FetchUserGroupsResponse, error) {
 	groups, err := uc.groupRepo.FindGroupsByUserID(uc.userID)
 	if err != nil {
 		return nil, err
 	}
 
-	result := &GetUserGroupsResponse{
+	result := &FetchUserGroupsResponse{
 		Groups: make([]GroupResponse, 0, len(groups)),
 	}
 
