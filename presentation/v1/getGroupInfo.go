@@ -19,7 +19,7 @@ type GroupInfoResponse struct {
 	GroupName      entity.GroupName     `json:"group_name"`
 	Password       entity.GroupPassword `json:"password"`
 	GroupMembers   []usecase.Member     `json:"group_members"`
-	GroupManagerID entity.UserID        `json:"group_manager_id"`
+	GroupManagerID entity.UserID        `json:"manager_id"`
 }
 
 func NewGetGroupInfo(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *GetGroupInfo {
