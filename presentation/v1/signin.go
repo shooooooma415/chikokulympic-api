@@ -11,11 +11,11 @@ import (
 )
 
 type SigninRequest struct {
-	AuthID string `json:"auth_id"`
+	AuthID entity.AuthID `json:"auth_id"`
 }
 
 type SigninResponse struct {
-	UserID string `json:"user_id"`
+	UserID entity.UserID `json:"user_id"`
 }
 
 type Signin struct {
@@ -45,7 +45,7 @@ func (s *Signin) Handler(c echo.Context) error {
 	}
 
 	response := SigninResponse{
-		UserID: string(user.UserID),
+		UserID: user.UserID,
 	}
 
 	return c.JSON(http.StatusOK, response)

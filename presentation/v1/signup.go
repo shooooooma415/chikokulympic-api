@@ -11,14 +11,14 @@ import (
 )
 
 type SignupRequest struct {
-	FCMToken string `json:"token"`
-	UserName string `json:"user_name"`
-	AuthID   string `json:"auth_id"`
-	UserIcon string `json:"user_icon"`
+	FCMToken entity.FCMToken `json:"token"`
+	UserName entity.UserName `json:"user_name"`
+	AuthID   entity.AuthID   `json:"auth_id"`
+	UserIcon entity.UserIcon `json:"user_icon"`
 }
 
 type SignupResponse struct {
-	UserID string `json:"user_id"`
+	UserID entity.UserID `json:"user_id"`
 }
 
 type Signup struct {
@@ -54,7 +54,7 @@ func (s *Signup) Handler(c echo.Context) error {
 	}
 
 	response := SignupResponse{
-		UserID: string(registeredUser.UserID),
+		UserID: registeredUser.UserID,
 	}
 
 	return c.JSON(http.StatusCreated, response)
