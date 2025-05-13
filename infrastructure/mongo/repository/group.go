@@ -16,7 +16,7 @@ type GroupRepo struct {
 	groupCollection *mongo.Collection
 }
 
-func NewGroupRepo(db *mongo.Database) repo.GroupRepository {
+func NewGroupRepository(db *mongo.Database) repo.GroupRepository {
 	return &GroupRepo{
 		groupCollection: db.Collection("groups"),
 	}

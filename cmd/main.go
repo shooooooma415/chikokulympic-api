@@ -35,9 +35,13 @@ func main() {
 
 	// リポジトリの初期化
 	userRepo := repository.NewUserRepository(db)
+	groupRepo := repository.NewGroupRepository(db)
 
 	// サーバーの初期化とルーティング設定
-	authServer := serverV1.NewAuthServer(userRepo)
+	authServer := serverV1.NewAuthServer(userRepo, groupRepo)
+	groupServer := serverV1.NewGroupServer(groupRepo, userRepo)
+	
+	groupServer.RegisterRoutes(e)
 	authServer.RegisterRoutes(e)
 
 	port := config.GetEnvWithDefault("PORT", "8080")
