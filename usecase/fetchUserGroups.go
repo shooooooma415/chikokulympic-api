@@ -44,9 +44,6 @@ func (uc *FetchUserGroupsUseCaseImpl) Execute() (*FetchUserGroupsResponse, error
 
 	for _, group := range groups {
 		memberCount := len(group.GroupMembers)
-		if group.GroupManagerID != "" {
-			memberCount++
-		}
 
 		isCreator := group.GroupManagerID == uc.userID
 
