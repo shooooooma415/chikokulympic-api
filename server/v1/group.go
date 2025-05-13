@@ -7,6 +7,7 @@ import (
 )
 
 type GroupServer struct {
+	createGroup   *presentationV1.PostGroup
 	joinGroup     *presentationV1.JoinGroup
 	leaveGroup    *presentationV1.LeaveGroup
 	getUserGroups *presentationV1.GetUserGroups
@@ -15,6 +16,7 @@ type GroupServer struct {
 
 func NewGroupServer(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *GroupServer {
 	return &GroupServer{
+		createGroup:  presentationV1.NewPostGroup(groupRepo, userRepo),
 		joinGroup:     presentationV1.NewJoinGroup(userRepo, groupRepo),
 		leaveGroup:    presentationV1.NewLeaveGroup(groupRepo),
 		getUserGroups: presentationV1.NewGetUserGroups(groupRepo),
@@ -22,12 +24,15 @@ func NewGroupServer(groupRepo repository.GroupRepository, userRepo repository.Us
 	}
 }
 func (s *GroupServer) RegisterRoutes(e *echo.Echo) {
-	groupGroup := e.Group("/auth")
-	groupGroup.POST("/group/join", s.joinGroup.Handler)
+	groupGroup := e.Group("/groups")
 
-	groupGroup.POST("/group/leave", s.leaveGroup.Handler)
+	groupGroup.POST("", s.createGroup.Handler)
 
-	groupGroup.GET("/user/:user_id/groups", s.getUserGroups.Handler)
+	groupGroup.POST("/join", s.joinGroup.Handler)
 
-	groupGroup.GET("/group/:group_id", s.getGroupInfo.Handler)
+	groupGroup.POST("/:group_id/leave", s.leaveGroup.Handler)
+
+	groupGroup.GET("/users/:user_id/groups", s.getUserGroups.Handler)
+
+	groupGroup.GET("/:group_id", s.getGroupInfo.Handler)
 }
