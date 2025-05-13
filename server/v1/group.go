@@ -22,11 +22,12 @@ func NewGroupServer(groupRepo repository.GroupRepository, userRepo repository.Us
 	}
 }
 func (s *GroupServer) RegisterRoutes(e *echo.Echo) {
-	e.POST("/group/join", s.joinGroup.Handler)
+	groupGroup := e.Group("/auth")
+	groupGroup.POST("/group/join", s.joinGroup.Handler)
 
-	e.POST("/group/leave", s.leaveGroup.Handler)
+	groupGroup.POST("/group/leave", s.leaveGroup.Handler)
 
-	e.GET("/user/:user_id/groups", s.getUserGroups.Handler)
+	groupGroup.GET("/user/:user_id/groups", s.getUserGroups.Handler)
 
-	e.GET("/group/:group_id", s.getGroupInfo.Handler)
+	groupGroup.GET("/group/:group_id", s.getGroupInfo.Handler)
 }
