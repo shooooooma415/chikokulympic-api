@@ -22,7 +22,7 @@ func NewAuthServer(userRepo repository.UserRepository) *AuthServer {
 }
 
 func (s *AuthServer) RegisterRoutes(e *echo.Echo) {
-	authGroup := e.Group("/auth")
+	authGroup := e.Group("/users")
 
 	authGroup.POST("/signup", s.signup.Handler)
 
