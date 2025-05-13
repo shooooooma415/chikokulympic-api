@@ -16,7 +16,7 @@ func TestGroupRepository(t *testing.T) {
 	// 各テストで共通のセットアップ処理
 	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
-	repo := repository.NewGroupRepo(db)
+	repo := repository.NewGroupRepository(db)
 
 	t.Run("FindGroupByGroupName", func(t *testing.T) {
 		testCases := []struct {
