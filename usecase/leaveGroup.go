@@ -33,11 +33,21 @@ func (uc *LeaveGroupUseCaseImpl) Execute() error {
 		return fmt.Errorf("グループが見つかりません")
 	}
 
+	if groupFound.GroupManagerID == uc.userID {
+		return fmt.Errorf("グループのマネージャーは退出できません")
+	}
+
+	memberFound := false
 	for i, memberID := range groupFound.GroupMembers {
 		if memberID == uc.userID {
 			groupFound.GroupMembers = append(groupFound.GroupMembers[:i], groupFound.GroupMembers[i+1:]...)
+			memberFound = true
 			break
 		}
+	}
+
+	if !memberFound {
+		return fmt.Errorf("指定されたユーザーはグループのメンバーではありません")
 	}
 
 	_, err = uc.groupRepo.UpdateGroup(groupFound)
