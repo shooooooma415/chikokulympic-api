@@ -24,12 +24,9 @@ func NewAuthServer(userRepo repository.UserRepository) *AuthServer {
 func (s *AuthServer) RegisterRoutes(e *echo.Echo) {
 	authGroup := e.Group("/auth")
 
-	// サインアップ用エンドポイント
 	authGroup.POST("/signup", s.signup.Handler)
 
-	// サインイン用エンドポイント
 	authGroup.POST("/signin", s.signin.Handler)
 
-	// ユーザー情報更新用エンドポイント
 	authGroup.PUT("", s.updateUser.Handler)
 }
