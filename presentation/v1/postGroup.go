@@ -40,12 +40,10 @@ func (p *PostGroup) Handler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse(err.Error()))
 	}
 
-	// バリデーション
 	if req.GroupName == "" || req.GroupPassword == "" || req.ManagerID == "" {
 		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse("グループ名、パスワード、作成者IDは必須です"))
 	}
 
-	// 新しいグループを作成
 	groupID := uuid.New().String()
 	group := &entity.Group{
 		GroupID:          entity.GroupID(groupID),
