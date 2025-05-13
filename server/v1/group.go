@@ -10,7 +10,6 @@ type GroupServer struct {
 	createGroup   *presentationV1.PostGroup
 	joinGroup     *presentationV1.JoinGroup
 	leaveGroup    *presentationV1.LeaveGroup
-	getUserGroups *presentationV1.GetUserGroups
 	getGroupInfo  *presentationV1.GetGroupInfo
 }
 
@@ -19,7 +18,6 @@ func NewGroupServer(groupRepo repository.GroupRepository, userRepo repository.Us
 		createGroup:  presentationV1.NewPostGroup(groupRepo, userRepo),
 		joinGroup:     presentationV1.NewJoinGroup(userRepo, groupRepo),
 		leaveGroup:    presentationV1.NewLeaveGroup(groupRepo),
-		getUserGroups: presentationV1.NewGetUserGroups(groupRepo),
 		getGroupInfo:  presentationV1.NewGetGroupInfo(groupRepo, userRepo),
 	}
 }
@@ -32,7 +30,6 @@ func (s *GroupServer) RegisterRoutes(e *echo.Echo) {
 
 	groupGroup.POST("/:group_id/leave", s.leaveGroup.Handler)
 
-	groupGroup.GET("/users/:user_id/groups", s.getUserGroups.Handler)
 
 	groupGroup.GET("/:group_id", s.getGroupInfo.Handler)
 }
