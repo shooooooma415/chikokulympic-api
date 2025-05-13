@@ -11,9 +11,9 @@ import (
 )
 
 type SignupRequest struct {
-	FCMToken entity.FCMToken `json:"token"`
-	UserName entity.UserName `json:"user_name"`
-	AuthID   entity.AuthID   `json:"auth_id"`
+	FCMToken entity.FCMToken `json:"token" validate:"required"`
+	UserName entity.UserName `json:"user_name" validate:"required"`
+	AuthID   entity.AuthID   `json:"auth_id" validate:"required"`
 	UserIcon entity.UserIcon `json:"user_icon"`
 }
 
