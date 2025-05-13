@@ -30,6 +30,5 @@ func (s *GroupServer) RegisterRoutes(e *echo.Echo) {
 
 	groupGroup.POST("/:group_id/leave", s.leaveGroup.Handler)
 
-
 	groupGroup.GET("/:group_id", s.getGroupInfo.Handler)
 }
