@@ -1,0 +1,626 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a Chikokulympic server API.",
+        "title": "Chikokulympic API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/groups": {
+            "post": {
+                "description": "新しいグループを作成する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "新しいグループを作成する",
+                "parameters": [
+                    {
+                        "description": "グループ作成リクエスト",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.PostGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.PostGroupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/join": {
+            "post": {
+                "description": "ユーザーが指定したグループに参加する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "グループに参加する",
+                "parameters": [
+                    {
+                        "description": "グループ参加リクエスト",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.JoinGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.JoinGroupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/{group_id}": {
+            "get": {
+                "description": "指定したグループIDのグループ情報を取得する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "グループ情報を取得する",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "グループID",
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.GroupInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/{group_id}/leave": {
+            "post": {
+                "description": "ユーザーが指定したグループから退会する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "グループから退会する",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "グループID",
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "グループ退会リクエスト",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.LeaveGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "put": {
+                "description": "ユーザーの名前やアイコンなどの情報を更新する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "ユーザー情報を更新する",
+                "parameters": [
+                    {
+                        "description": "ユーザー情報更新リクエスト",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/signin": {
+            "post": {
+                "description": "認証IDを使用してユーザーのサインイン（ログイン）を行う",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "サインイン（ログイン）を行う",
+                "parameters": [
+                    {
+                        "description": "サインインリクエスト",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.SigninRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.SigninResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/signup": {
+            "post": {
+                "description": "新規ユーザーの登録（サインアップ）を行う",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "新規ユーザー登録を行う",
+                "parameters": [
+                    {
+                        "description": "サインアップリクエスト",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.SignupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.SignupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{user_id}/groups": {
+            "get": {
+                "description": "指定したユーザーIDのユーザーが所属するグループの一覧を取得する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "ユーザーが所属するグループ一覧を取得する",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ユーザーID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/usecase.UserGroup"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "middleware.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecase.GroupResponse": {
+            "description": "グループ情報レスポンス",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "group123"
+                },
+                "is_creator": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "member_count": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "name": {
+                    "type": "string",
+                    "example": "テストグループ"
+                }
+            }
+        },
+        "usecase.Member": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecase.UserGroup": {
+            "description": "ユーザーが所属するグループ一覧レスポンス",
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usecase.GroupResponse"
+                    }
+                }
+            }
+        },
+        "v1.GroupInfoResponse": {
+            "description": "グループ情報レスポンス",
+            "type": "object",
+            "properties": {
+                "group_members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usecase.Member"
+                    }
+                },
+                "group_name": {
+                    "type": "string",
+                    "example": "テストグループ"
+                },
+                "manager_id": {
+                    "type": "string",
+                    "example": "user456"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password123"
+                }
+            }
+        },
+        "v1.JoinGroupRequest": {
+            "description": "グループ参加リクエスト",
+            "type": "object",
+            "required": [
+                "group_name",
+                "group_password",
+                "user_id"
+            ],
+            "properties": {
+                "group_name": {
+                    "type": "string",
+                    "example": "テストグループ"
+                },
+                "group_password": {
+                    "type": "string",
+                    "example": "password123"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
+        },
+        "v1.JoinGroupResponse": {
+            "description": "グループ参加レスポンス",
+            "type": "object",
+            "properties": {
+                "group_id": {
+                    "type": "string",
+                    "example": "group123"
+                }
+            }
+        },
+        "v1.LeaveGroupRequest": {
+            "description": "グループ退会リクエスト",
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
+        },
+        "v1.PostGroupRequest": {
+            "description": "グループ作成リクエスト",
+            "type": "object",
+            "properties": {
+                "group_description": {
+                    "type": "string",
+                    "example": "これはテストグループです"
+                },
+                "group_name": {
+                    "type": "string",
+                    "example": "テストグループ"
+                },
+                "group_password": {
+                    "type": "string",
+                    "example": "password123"
+                },
+                "manager_id": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
+        },
+        "v1.PostGroupResponse": {
+            "description": "グループ作成レスポンス",
+            "type": "object",
+            "properties": {
+                "group_id": {
+                    "type": "string",
+                    "example": "group123"
+                }
+            }
+        },
+        "v1.SigninRequest": {
+            "description": "サインインリクエスト",
+            "type": "object",
+            "properties": {
+                "auth_id": {
+                    "type": "string",
+                    "example": "auth456"
+                }
+            }
+        },
+        "v1.SigninResponse": {
+            "description": "サインインレスポンス",
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
+        },
+        "v1.SignupRequest": {
+            "description": "サインアップリクエスト",
+            "type": "object",
+            "properties": {
+                "auth_id": {
+                    "type": "string",
+                    "example": "auth456"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "fcm-token-123456"
+                },
+                "user_icon": {
+                    "type": "string",
+                    "example": "https://example.com/icon.png"
+                },
+                "user_name": {
+                    "type": "string",
+                    "example": "山田太郎"
+                }
+            }
+        },
+        "v1.SignupResponse": {
+            "description": "サインアップレスポンス",
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
+        },
+        "v1.UpdateUserRequest": {
+            "description": "ユーザー情報更新リクエスト",
+            "type": "object",
+            "properties": {
+                "user_icon": {
+                    "type": "string",
+                    "example": "https://example.com/icon.png"
+                },
+                "user_name": {
+                    "type": "string",
+                    "example": "山田太郎"
+                }
+            }
+        },
+        "v1.UpdateUserResponse": {
+            "description": "ユーザー情報更新レスポンス",
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,422 @@
+basePath: /
+definitions:
+  middleware.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  usecase.GroupResponse:
+    description: グループ情報レスポンス
+    properties:
+      id:
+        example: group123
+        type: string
+      is_creator:
+        example: true
+        type: boolean
+      member_count:
+        example: 5
+        type: integer
+      name:
+        example: テストグループ
+        type: string
+    type: object
+  usecase.Member:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  usecase.UserGroup:
+    description: ユーザーが所属するグループ一覧レスポンス
+    properties:
+      groups:
+        items:
+          $ref: '#/definitions/usecase.GroupResponse'
+        type: array
+    type: object
+  v1.GroupInfoResponse:
+    description: グループ情報レスポンス
+    properties:
+      group_members:
+        items:
+          $ref: '#/definitions/usecase.Member'
+        type: array
+      group_name:
+        example: テストグループ
+        type: string
+      manager_id:
+        example: user456
+        type: string
+      password:
+        example: password123
+        type: string
+    type: object
+  v1.JoinGroupRequest:
+    description: グループ参加リクエスト
+    properties:
+      group_name:
+        example: テストグループ
+        type: string
+      group_password:
+        example: password123
+        type: string
+      user_id:
+        example: user123
+        type: string
+    required:
+    - group_name
+    - group_password
+    - user_id
+    type: object
+  v1.JoinGroupResponse:
+    description: グループ参加レスポンス
+    properties:
+      group_id:
+        example: group123
+        type: string
+    type: object
+  v1.LeaveGroupRequest:
+    description: グループ退会リクエスト
+    properties:
+      user_id:
+        example: user123
+        type: string
+    required:
+    - user_id
+    type: object
+  v1.PostGroupRequest:
+    description: グループ作成リクエスト
+    properties:
+      group_description:
+        example: これはテストグループです
+        type: string
+      group_name:
+        example: テストグループ
+        type: string
+      group_password:
+        example: password123
+        type: string
+      manager_id:
+        example: user123
+        type: string
+    type: object
+  v1.PostGroupResponse:
+    description: グループ作成レスポンス
+    properties:
+      group_id:
+        example: group123
+        type: string
+    type: object
+  v1.SigninRequest:
+    description: サインインリクエスト
+    properties:
+      auth_id:
+        example: auth456
+        type: string
+    type: object
+  v1.SigninResponse:
+    description: サインインレスポンス
+    properties:
+      user_id:
+        example: user123
+        type: string
+    type: object
+  v1.SignupRequest:
+    description: サインアップリクエスト
+    properties:
+      auth_id:
+        example: auth456
+        type: string
+      token:
+        example: fcm-token-123456
+        type: string
+      user_icon:
+        example: https://example.com/icon.png
+        type: string
+      user_name:
+        example: 山田太郎
+        type: string
+    type: object
+  v1.SignupResponse:
+    description: サインアップレスポンス
+    properties:
+      user_id:
+        example: user123
+        type: string
+    type: object
+  v1.UpdateUserRequest:
+    description: ユーザー情報更新リクエスト
+    properties:
+      user_icon:
+        example: https://example.com/icon.png
+        type: string
+      user_name:
+        example: 山田太郎
+        type: string
+    type: object
+  v1.UpdateUserResponse:
+    description: ユーザー情報更新レスポンス
+    properties:
+      user_id:
+        example: user123
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a Chikokulympic server API.
+  title: Chikokulympic API
+  version: "1.0"
+paths:
+  /groups:
+    post:
+      consumes:
+      - application/json
+      description: 新しいグループを作成する
+      parameters:
+      - description: グループ作成リクエスト
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.PostGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.PostGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: 新しいグループを作成する
+      tags:
+      - groups
+  /groups/{group_id}:
+    get:
+      consumes:
+      - application/json
+      description: 指定したグループIDのグループ情報を取得する
+      parameters:
+      - description: グループID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.GroupInfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: グループ情報を取得する
+      tags:
+      - groups
+  /groups/{group_id}/leave:
+    post:
+      consumes:
+      - application/json
+      description: ユーザーが指定したグループから退会する
+      parameters:
+      - description: グループID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      - description: グループ退会リクエスト
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.LeaveGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: グループから退会する
+      tags:
+      - groups
+  /groups/join:
+    post:
+      consumes:
+      - application/json
+      description: ユーザーが指定したグループに参加する
+      parameters:
+      - description: グループ参加リクエスト
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.JoinGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.JoinGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: グループに参加する
+      tags:
+      - groups
+  /users:
+    put:
+      consumes:
+      - application/json
+      description: ユーザーの名前やアイコンなどの情報を更新する
+      parameters:
+      - description: ユーザー情報更新リクエスト
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.UpdateUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: ユーザー情報を更新する
+      tags:
+      - users
+  /users/{user_id}/groups:
+    get:
+      consumes:
+      - application/json
+      description: 指定したユーザーIDのユーザーが所属するグループの一覧を取得する
+      parameters:
+      - description: ユーザーID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usecase.UserGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: ユーザーが所属するグループ一覧を取得する
+      tags:
+      - groups
+  /users/signin:
+    post:
+      consumes:
+      - application/json
+      description: 認証IDを使用してユーザーのサインイン（ログイン）を行う
+      parameters:
+      - description: サインインリクエスト
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SigninRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.SigninResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: サインイン（ログイン）を行う
+      tags:
+      - users
+  /users/signup:
+    post:
+      consumes:
+      - application/json
+      description: 新規ユーザーの登録（サインアップ）を行う
+      parameters:
+      - description: サインアップリクエスト
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.SignupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: 新規ユーザー登録を行う
+      tags:
+      - users
+swagger: "2.0"
