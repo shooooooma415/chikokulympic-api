@@ -11,8 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// PostGroupRequest はグループ作成リクエストの構造体
-// @Description グループ作成リクエスト
 type PostGroupRequest struct {
 	GroupName        entity.GroupName        `json:"group_name" example:"テストグループ"`
 	GroupPassword    entity.GroupPassword    `json:"group_password" example:"password123"`
@@ -20,19 +18,15 @@ type PostGroupRequest struct {
 	GroupDescription entity.GroupDescription `json:"group_description" example:"これはテストグループです"`
 }
 
-// PostGroupResponse はグループ作成レスポンスの構造体
-// @Description グループ作成レスポンス
 type PostGroupResponse struct {
 	GroupID entity.GroupID `json:"group_id" example:"group123"`
 }
 
-// PostGroup はグループ作成ハンドラの構造体
 type PostGroup struct {
 	groupRepo repository.GroupRepository
 	userRepo  repository.UserRepository
 }
 
-// NewPostGroup は新しいPostGroupハンドラを作成する
 func NewPostGroup(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *PostGroup {
 	return &PostGroup{
 		groupRepo: groupRepo,
@@ -40,13 +34,12 @@ func NewPostGroup(groupRepo repository.GroupRepository, userRepo repository.User
 	}
 }
 
-// Handler はグループ作成APIのハンドラ
-// @Summary 新しいグループを作成する
-// @Description 新しいグループを作成する
+// @Summary create group
+// @Description create a new group
 // @Tags groups
 // @Accept json
 // @Produce json
-// @Param request body PostGroupRequest true "グループ作成リクエスト"
+// @Param request body PostGroupRequest true "request"
 // @Success 201 {object} PostGroupResponse
 // @Failure 400 {object} middleware.ErrorResponse
 // @Failure 500 {object} middleware.ErrorResponse

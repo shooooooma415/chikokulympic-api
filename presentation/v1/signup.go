@@ -10,8 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// SignupRequest はサインアップリクエストの構造体
-// @Description サインアップリクエスト
 type SignupRequest struct {
 	FCMToken entity.FCMToken `json:"token" example:"fcm-token-123456"`
 	UserName entity.UserName `json:"user_name" example:"山田太郎"`
@@ -19,31 +17,26 @@ type SignupRequest struct {
 	UserIcon entity.UserIcon `json:"user_icon" example:"https://example.com/icon.png"`
 }
 
-// SignupResponse はサインアップレスポンスの構造体
-// @Description サインアップレスポンス
 type SignupResponse struct {
 	UserID entity.UserID `json:"user_id" example:"user123"`
 }
 
-// Signup はサインアップハンドラの構造体
 type Signup struct {
 	userRepo repository.UserRepository
 }
 
-// NewSignup は新しいSignupハンドラを作成する
 func NewSignup(userRepo repository.UserRepository) *Signup {
 	return &Signup{
 		userRepo: userRepo,
 	}
 }
 
-// Handler はサインアップAPIのハンドラ
-// @Summary 新規ユーザー登録を行う
-// @Description 新規ユーザーの登録（サインアップ）を行う
+// @Summary subscribe user
+// @Description subscribe user to the service
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param request body SignupRequest true "サインアップリクエスト"
+// @Param request body SignupRequest true "request"
 // @Success 201 {object} SignupResponse
 // @Failure 400 {object} middleware.ErrorResponse
 // @Failure 500 {object} middleware.ErrorResponse

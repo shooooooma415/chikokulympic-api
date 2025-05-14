@@ -10,25 +10,22 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetUserGroups はユーザーのグループ一覧取得ハンドラの構造体
 type GetUserGroups struct {
 	groupRepo repository.GroupRepository
 }
 
-// NewGetUserGroups は新しいGetUserGroupsハンドラを作成する
 func NewGetUserGroups(groupRepo repository.GroupRepository) *GetUserGroups {
 	return &GetUserGroups{
 		groupRepo: groupRepo,
 	}
 }
 
-// Handler はユーザーのグループ一覧取得APIのハンドラ
-// @Summary ユーザーが所属するグループ一覧を取得する
-// @Description 指定したユーザーIDのユーザーが所属するグループの一覧を取得する
+// @Summary get user groups
+// @Description get user groups
 // @Tags groups
 // @Accept json
 // @Produce json
-// @Param user_id path string true "ユーザーID"
+// @Param user_id path string true "user_id"
 // @Success 200 {array} usecase.UserGroup
 // @Failure 400 {object} middleware.ErrorResponse
 // @Failure 500 {object} middleware.ErrorResponse

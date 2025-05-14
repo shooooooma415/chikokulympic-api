@@ -10,14 +10,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetGroupInfo はグループ情報取得ハンドラの構造体
 type GetGroupInfo struct {
 	groupRepo repository.GroupRepository
 	userRepo  repository.UserRepository
 }
 
-// GroupInfoResponse はグループ情報レスポンスの構造体
-// @Description グループ情報レスポンス
 type GroupInfoResponse struct {
 	GroupName      entity.GroupName     `json:"group_name" example:"テストグループ"`
 	Password       entity.GroupPassword `json:"password" example:"password123"`
@@ -25,7 +22,6 @@ type GroupInfoResponse struct {
 	GroupManagerID entity.UserID        `json:"manager_id" example:"user456"`
 }
 
-// NewGetGroupInfo は新しいGetGroupInfoハンドラを作成する
 func NewGetGroupInfo(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *GetGroupInfo {
 	return &GetGroupInfo{
 		groupRepo: groupRepo,
@@ -33,13 +29,12 @@ func NewGetGroupInfo(groupRepo repository.GroupRepository, userRepo repository.U
 	}
 }
 
-// Handler はグループ情報取得APIのハンドラ
-// @Summary グループ情報を取得する
-// @Description 指定したグループIDのグループ情報を取得する
+// @Summary get group info
+// @Description get chosen group info
 // @Tags groups
 // @Accept json
 // @Produce json
-// @Param group_id path string true "グループID"
+// @Param group_id path string true "group_id"
 // @Success 200 {object} GroupInfoResponse
 // @Failure 400 {object} middleware.ErrorResponse
 // @Failure 404 {object} middleware.ErrorResponse
