@@ -6,7 +6,6 @@ definitions:
         type: string
     type: object
   usecase.GroupResponse:
-    description: グループ情報レスポンス
     properties:
       id:
         example: group123
@@ -31,7 +30,6 @@ definitions:
         type: string
     type: object
   usecase.UserGroup:
-    description: ユーザーが所属するグループ一覧レスポンス
     properties:
       groups:
         items:
@@ -39,7 +37,6 @@ definitions:
         type: array
     type: object
   v1.GroupInfoResponse:
-    description: グループ情報レスポンス
     properties:
       group_members:
         items:
@@ -56,7 +53,6 @@ definitions:
         type: string
     type: object
   v1.JoinGroupRequest:
-    description: グループ参加リクエスト
     properties:
       group_name:
         example: テストグループ
@@ -73,14 +69,12 @@ definitions:
     - user_id
     type: object
   v1.JoinGroupResponse:
-    description: グループ参加レスポンス
     properties:
       group_id:
         example: group123
         type: string
     type: object
   v1.LeaveGroupRequest:
-    description: グループ退会リクエスト
     properties:
       user_id:
         example: user123
@@ -89,7 +83,6 @@ definitions:
     - user_id
     type: object
   v1.PostGroupRequest:
-    description: グループ作成リクエスト
     properties:
       group_description:
         example: これはテストグループです
@@ -105,28 +98,24 @@ definitions:
         type: string
     type: object
   v1.PostGroupResponse:
-    description: グループ作成レスポンス
     properties:
       group_id:
         example: group123
         type: string
     type: object
   v1.SigninRequest:
-    description: サインインリクエスト
     properties:
       auth_id:
         example: auth456
         type: string
     type: object
   v1.SigninResponse:
-    description: サインインレスポンス
     properties:
       user_id:
         example: user123
         type: string
     type: object
   v1.SignupRequest:
-    description: サインアップリクエスト
     properties:
       auth_id:
         example: auth456
@@ -142,14 +131,12 @@ definitions:
         type: string
     type: object
   v1.SignupResponse:
-    description: サインアップレスポンス
     properties:
       user_id:
         example: user123
         type: string
     type: object
   v1.UpdateUserRequest:
-    description: ユーザー情報更新リクエスト
     properties:
       user_icon:
         example: https://example.com/icon.png
@@ -159,7 +146,6 @@ definitions:
         type: string
     type: object
   v1.UpdateUserResponse:
-    description: ユーザー情報更新レスポンス
     properties:
       user_id:
         example: user123
@@ -176,9 +162,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: 新しいグループを作成する
+      description: create a new group
       parameters:
-      - description: グループ作成リクエスト
+      - description: request
         in: body
         name: request
         required: true
@@ -199,16 +185,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: 新しいグループを作成する
+      summary: create group
       tags:
       - groups
   /groups/{group_id}:
     get:
       consumes:
       - application/json
-      description: 指定したグループIDのグループ情報を取得する
+      description: get chosen group info
       parameters:
-      - description: グループID
+      - description: group_id
         in: path
         name: group_id
         required: true
@@ -232,21 +218,21 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: グループ情報を取得する
+      summary: get group info
       tags:
       - groups
   /groups/{group_id}/leave:
     post:
       consumes:
       - application/json
-      description: ユーザーが指定したグループから退会する
+      description: leave a chosen group
       parameters:
-      - description: グループID
+      - description: group_id
         in: path
         name: group_id
         required: true
         type: string
-      - description: グループ退会リクエスト
+      - description: request
         in: body
         name: request
         required: true
@@ -265,16 +251,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: グループから退会する
+      summary: leave group
       tags:
       - groups
   /groups/join:
     post:
       consumes:
       - application/json
-      description: ユーザーが指定したグループに参加する
+      description: join a chosen group
       parameters:
-      - description: グループ参加リクエスト
+      - description: request
         in: body
         name: request
         required: true
@@ -295,16 +281,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: グループに参加する
+      summary: join group
       tags:
       - groups
   /users:
     put:
       consumes:
       - application/json
-      description: ユーザーの名前やアイコンなどの情報を更新する
+      description: update user information(icon, name)
       parameters:
-      - description: ユーザー情報更新リクエスト
+      - description: request
         in: body
         name: request
         required: true
@@ -325,16 +311,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: ユーザー情報を更新する
+      summary: update user
       tags:
       - users
   /users/{user_id}/groups:
     get:
       consumes:
       - application/json
-      description: 指定したユーザーIDのユーザーが所属するグループの一覧を取得する
+      description: get user groups
       parameters:
-      - description: ユーザーID
+      - description: user_id
         in: path
         name: user_id
         required: true
@@ -356,16 +342,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: ユーザーが所属するグループ一覧を取得する
+      summary: get user groups
       tags:
       - groups
   /users/signin:
     post:
       consumes:
       - application/json
-      description: 認証IDを使用してユーザーのサインイン（ログイン）を行う
+      description: signin user from auth_id
       parameters:
-      - description: サインインリクエスト
+      - description: request
         in: body
         name: request
         required: true
@@ -386,16 +372,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: サインイン（ログイン）を行う
+      summary: signin user
       tags:
       - users
   /users/signup:
     post:
       consumes:
       - application/json
-      description: 新規ユーザーの登録（サインアップ）を行う
+      description: subscribe user to the service
       parameters:
-      - description: サインアップリクエスト
+      - description: request
         in: body
         name: request
         required: true
@@ -416,7 +402,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
-      summary: 新規ユーザー登録を行う
+      summary: subscribe user
       tags:
       - users
 swagger: "2.0"

@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/groups": {
             "post": {
-                "description": "新しいグループを作成する",
+                "description": "create a new group",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,10 +27,10 @@ const docTemplate = `{
                 "tags": [
                     "groups"
                 ],
-                "summary": "新しいグループを作成する",
+                "summary": "create group",
                 "parameters": [
                     {
-                        "description": "グループ作成リクエスト",
+                        "description": "request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -63,7 +63,7 @@ const docTemplate = `{
         },
         "/groups/join": {
             "post": {
-                "description": "ユーザーが指定したグループに参加する",
+                "description": "join a chosen group",
                 "consumes": [
                     "application/json"
                 ],
@@ -73,10 +73,10 @@ const docTemplate = `{
                 "tags": [
                     "groups"
                 ],
-                "summary": "グループに参加する",
+                "summary": "join group",
                 "parameters": [
                     {
-                        "description": "グループ参加リクエスト",
+                        "description": "request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -109,7 +109,7 @@ const docTemplate = `{
         },
         "/groups/{group_id}": {
             "get": {
-                "description": "指定したグループIDのグループ情報を取得する",
+                "description": "get chosen group info",
                 "consumes": [
                     "application/json"
                 ],
@@ -119,11 +119,11 @@ const docTemplate = `{
                 "tags": [
                     "groups"
                 ],
-                "summary": "グループ情報を取得する",
+                "summary": "get group info",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "グループID",
+                        "description": "group_id",
                         "name": "group_id",
                         "in": "path",
                         "required": true
@@ -159,7 +159,7 @@ const docTemplate = `{
         },
         "/groups/{group_id}/leave": {
             "post": {
-                "description": "ユーザーが指定したグループから退会する",
+                "description": "leave a chosen group",
                 "consumes": [
                     "application/json"
                 ],
@@ -169,17 +169,17 @@ const docTemplate = `{
                 "tags": [
                     "groups"
                 ],
-                "summary": "グループから退会する",
+                "summary": "leave group",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "グループID",
+                        "description": "group_id",
                         "name": "group_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "グループ退会リクエスト",
+                        "description": "request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -209,7 +209,7 @@ const docTemplate = `{
         },
         "/users": {
             "put": {
-                "description": "ユーザーの名前やアイコンなどの情報を更新する",
+                "description": "update user information(icon, name)",
                 "consumes": [
                     "application/json"
                 ],
@@ -219,10 +219,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "ユーザー情報を更新する",
+                "summary": "update user",
                 "parameters": [
                     {
-                        "description": "ユーザー情報更新リクエスト",
+                        "description": "request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -255,7 +255,7 @@ const docTemplate = `{
         },
         "/users/signin": {
             "post": {
-                "description": "認証IDを使用してユーザーのサインイン（ログイン）を行う",
+                "description": "signin user from auth_id",
                 "consumes": [
                     "application/json"
                 ],
@@ -265,10 +265,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "サインイン（ログイン）を行う",
+                "summary": "signin user",
                 "parameters": [
                     {
-                        "description": "サインインリクエスト",
+                        "description": "request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -301,7 +301,7 @@ const docTemplate = `{
         },
         "/users/signup": {
             "post": {
-                "description": "新規ユーザーの登録（サインアップ）を行う",
+                "description": "subscribe user to the service",
                 "consumes": [
                     "application/json"
                 ],
@@ -311,10 +311,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "新規ユーザー登録を行う",
+                "summary": "subscribe user",
                 "parameters": [
                     {
-                        "description": "サインアップリクエスト",
+                        "description": "request",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -347,7 +347,7 @@ const docTemplate = `{
         },
         "/users/{user_id}/groups": {
             "get": {
-                "description": "指定したユーザーIDのユーザーが所属するグループの一覧を取得する",
+                "description": "get user groups",
                 "consumes": [
                     "application/json"
                 ],
@@ -357,11 +357,11 @@ const docTemplate = `{
                 "tags": [
                     "groups"
                 ],
-                "summary": "ユーザーが所属するグループ一覧を取得する",
+                "summary": "get user groups",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ユーザーID",
+                        "description": "user_id",
                         "name": "user_id",
                         "in": "path",
                         "required": true
@@ -403,7 +403,6 @@ const docTemplate = `{
             }
         },
         "usecase.GroupResponse": {
-            "description": "グループ情報レスポンス",
             "type": "object",
             "properties": {
                 "id": {
@@ -439,7 +438,6 @@ const docTemplate = `{
             }
         },
         "usecase.UserGroup": {
-            "description": "ユーザーが所属するグループ一覧レスポンス",
             "type": "object",
             "properties": {
                 "groups": {
@@ -451,7 +449,6 @@ const docTemplate = `{
             }
         },
         "v1.GroupInfoResponse": {
-            "description": "グループ情報レスポンス",
             "type": "object",
             "properties": {
                 "group_members": {
@@ -475,7 +472,6 @@ const docTemplate = `{
             }
         },
         "v1.JoinGroupRequest": {
-            "description": "グループ参加リクエスト",
             "type": "object",
             "required": [
                 "group_name",
@@ -498,7 +494,6 @@ const docTemplate = `{
             }
         },
         "v1.JoinGroupResponse": {
-            "description": "グループ参加レスポンス",
             "type": "object",
             "properties": {
                 "group_id": {
@@ -508,7 +503,6 @@ const docTemplate = `{
             }
         },
         "v1.LeaveGroupRequest": {
-            "description": "グループ退会リクエスト",
             "type": "object",
             "required": [
                 "user_id"
@@ -521,7 +515,6 @@ const docTemplate = `{
             }
         },
         "v1.PostGroupRequest": {
-            "description": "グループ作成リクエスト",
             "type": "object",
             "properties": {
                 "group_description": {
@@ -543,7 +536,6 @@ const docTemplate = `{
             }
         },
         "v1.PostGroupResponse": {
-            "description": "グループ作成レスポンス",
             "type": "object",
             "properties": {
                 "group_id": {
@@ -553,7 +545,6 @@ const docTemplate = `{
             }
         },
         "v1.SigninRequest": {
-            "description": "サインインリクエスト",
             "type": "object",
             "properties": {
                 "auth_id": {
@@ -563,7 +554,6 @@ const docTemplate = `{
             }
         },
         "v1.SigninResponse": {
-            "description": "サインインレスポンス",
             "type": "object",
             "properties": {
                 "user_id": {
@@ -573,7 +563,6 @@ const docTemplate = `{
             }
         },
         "v1.SignupRequest": {
-            "description": "サインアップリクエスト",
             "type": "object",
             "properties": {
                 "auth_id": {
@@ -595,7 +584,6 @@ const docTemplate = `{
             }
         },
         "v1.SignupResponse": {
-            "description": "サインアップレスポンス",
             "type": "object",
             "properties": {
                 "user_id": {
@@ -605,7 +593,6 @@ const docTemplate = `{
             }
         },
         "v1.UpdateUserRequest": {
-            "description": "ユーザー情報更新リクエスト",
             "type": "object",
             "properties": {
                 "user_icon": {
@@ -619,7 +606,6 @@ const docTemplate = `{
             }
         },
         "v1.UpdateUserResponse": {
-            "description": "ユーザー情報更新レスポンス",
             "type": "object",
             "properties": {
                 "user_id": {
