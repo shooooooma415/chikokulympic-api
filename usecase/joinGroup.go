@@ -6,10 +6,15 @@ import (
 	"fmt"
 )
 
+// JoinGroupUseCase はグループ参加のユースケースインターフェース
+// @Summary グループに参加するユースケース
+// @Description ユーザーが指定されたグループに参加するためのユースケース
+// @Tags group
 type JoinGroupUseCase interface {
 	Execute() (*entity.GroupID, error)
 }
 
+// JoinGroupUseCaseImpl はグループ参加ユースケースの実装
 type JoinGroupUseCaseImpl struct {
 	groupRepo repository.GroupRepository
 	userRepo  repository.UserRepository
@@ -17,6 +22,7 @@ type JoinGroupUseCaseImpl struct {
 	group     entity.Group
 }
 
+// NewJoinGroupUseCase は新しいJoinGroupUseCaseを作成する
 func NewJoinGroupUseCase(groupRepo repository.GroupRepository, userRepo repository.UserRepository, userID entity.UserID, group entity.Group) *JoinGroupUseCaseImpl {
 	return &JoinGroupUseCaseImpl{
 		groupRepo: groupRepo,
@@ -26,6 +32,13 @@ func NewJoinGroupUseCase(groupRepo repository.GroupRepository, userRepo reposito
 	}
 }
 
+// Execute はグループ参加処理を実行する
+// @Summary グループ参加処理を実行する
+// @Description ユーザーがグループに参加する処理を実行します
+// @Success 200 {object} entity.GroupID "成功時はグループIDを返す"
+// @Failure 400 {string} string "グループが存在しない場合や、パスワードが一致しない場合など"
+// @Failure 404 {string} string "ユーザーが見つからない場合"
+// @Failure 409 {string} string "すでにグループに参加している場合"
 func (uc *JoinGroupUseCaseImpl) Execute() (*entity.GroupID, error) {
 	groupFound, err := uc.groupRepo.FindGroupByGroupName(&uc.group.GroupName)
 	if err != nil {
