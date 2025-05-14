@@ -10,24 +10,41 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// SigninRequest はサインインリクエストの構造体
+// @Description サインインリクエスト
 type SigninRequest struct {
-	AuthID entity.AuthID `json:"auth_id"`
+	AuthID entity.AuthID `json:"auth_id" example:"auth456"`
 }
 
+// SigninResponse はサインインレスポンスの構造体
+// @Description サインインレスポンス
 type SigninResponse struct {
-	UserID entity.UserID `json:"user_id"`
+	UserID entity.UserID `json:"user_id" example:"user123"`
 }
 
+// Signin はサインインハンドラの構造体
 type Signin struct {
 	userRepo repository.UserRepository
 }
 
+// NewSignin は新しいSigninハンドラを作成する
 func NewSignin(userRepo repository.UserRepository) *Signin {
 	return &Signin{
 		userRepo: userRepo,
 	}
 }
 
+// Handler はサインインAPIのハンドラ
+// @Summary サインイン（ログイン）を行う
+// @Description 認証IDを使用してユーザーのサインイン（ログイン）を行う
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body SigninRequest true "サインインリクエスト"
+// @Success 200 {object} SigninResponse
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /users/signin [post]
 func (s *Signin) Handler(c echo.Context) error {
 	req := new(SigninRequest)
 	if err := c.Bind(req); err != nil {
