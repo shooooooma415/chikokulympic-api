@@ -12,7 +12,7 @@ import (
 
 type JoinGroupRequest struct {
 	GroupName     entity.GroupName     `json:"group_name" validate:"required"`
-	GroupPassword entity.GroupPassword `json:"group_password" validate:"required"`
+	GroupPassword entity.GroupPassword `json:"password" validate:"required"`
 	UserID        entity.UserID        `json:"user_id" validate:"required"`
 }
 

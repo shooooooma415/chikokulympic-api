@@ -12,10 +12,10 @@ import (
 )
 
 type PostGroupRequest struct {
-	GroupName        entity.GroupName        `json:"group_name"`
-	GroupPassword    entity.GroupPassword    `json:"group_password"`
-	ManagerID        entity.UserID           `json:"manager_id"`
-	GroupDescription entity.GroupDescription `json:"group_description"`
+	GroupName        entity.GroupName        `json:"group_name" validate:"required"`
+	GroupPassword    entity.GroupPassword    `json:"password" validate:"required"`
+	ManagerID        entity.UserID           `json:"manager_id" validate:"required"`
+	GroupDescription entity.GroupDescription `json:"description" validate:"required"`
 }
 
 type PostGroupResponse struct {
