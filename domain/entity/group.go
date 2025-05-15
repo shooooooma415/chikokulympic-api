@@ -1,15 +1,10 @@
 package entity
 
 type GroupID string
-
 type GroupName string
-
 type GroupPassword string
-
 type GroupDescription string
-
 type GroupMembers []UserID
-
 type GroupEvents []EventID
 
 type Group struct {

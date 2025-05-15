@@ -2,15 +2,10 @@ package entity
 
 
 type UserID string
-
 type AuthID string
-
 type UserName string
-
 type UserIcon string
-
 type FCMToken string
-
 type Alias string
 
 type User struct {
