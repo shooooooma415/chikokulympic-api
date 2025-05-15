@@ -16,7 +16,7 @@ type GetGroupInfo struct {
 }
 
 type GroupInfoResponse struct {
-	GroupName      entity.GroupName     `json:"group_name" validate:"required" example:"グループ名"`
+	GroupName      entity.GroupName     `json:"group_name" validate:"required" example:"group_name"`
 	Password       entity.GroupPassword `json:"password" validate:"required" example:"password"`
 	GroupMembers   []usecase.Member     `json:"group_members" validate:"required"`
 	GroupManagerID entity.UserID        `json:"manager_id" validate:"required" example:"user_id"`

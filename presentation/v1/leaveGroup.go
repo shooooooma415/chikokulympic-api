@@ -11,7 +11,7 @@ import (
 )
 
 type LeaveGroupRequest struct {
-	UserID entity.UserID `json:"user_id" validate:"required" example:"user123"`
+	UserID entity.UserID `json:"user_id" validate:"required" example:"user_id"`
 }
 
 type LeaveGroup struct {

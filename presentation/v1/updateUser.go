@@ -12,7 +12,7 @@ import (
 
 
 type UpdateUserRequest struct {
-	UserName entity.UserName `json:"user_name" example:"山田太郎"`
+	UserName entity.UserName `json:"user_name" example:"user_name"`
 	UserIcon entity.UserIcon `json:"user_icon" example:"https://example.com/icon.png"`
 }
 
