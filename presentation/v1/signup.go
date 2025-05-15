@@ -11,10 +11,10 @@ import (
 )
 
 type SignupRequest struct {
-	FCMToken entity.FCMToken `json:"token" example:"fcm-token-123456"`
-	UserName entity.UserName `json:"user_name" example:"山田太郎"`
-	AuthID   entity.AuthID   `json:"auth_id" example:"auth456"`
-	UserIcon entity.UserIcon `json:"user_icon" example:"https://example.com/icon.png"`
+	FCMToken entity.FCMToken `json:"token" validate:"required" example:"fcm_token"`
+	UserName entity.UserName `json:"user_name" validate:"required" example:"user_name"`
+	AuthID   entity.AuthID   `json:"auth_id" validate:"required" example:"auth_id"`
+	UserIcon entity.UserIcon `json:"user_icon" example:"user_icon"`
 }
 
 type SignupResponse struct {

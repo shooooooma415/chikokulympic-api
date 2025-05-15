@@ -3,6 +3,7 @@ package usecase
 import (
 	"chikokulympic-api/domain/entity"
 	"chikokulympic-api/domain/repository"
+	"sync"
 )
 
 
@@ -47,23 +48,31 @@ func (uc *FetchUserGroupsUseCaseImpl) Execute() (*FetchUserGroupsResponse, error
 		Groups: make([]GroupResponse, 0, len(groups)),
 	}
 
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
 	for _, group := range groups {
-		memberCount := len(group.GroupMembers)
-		if group.GroupManagerID != "" {
-			memberCount++
-		}
+		wg.Add(1)
+		go func(g *entity.Group) {
+			defer wg.Done()
 
-		isCreator := group.GroupManagerID == uc.userID
+			memberCount := len(g.GroupMembers)
+			isCreator := g.GroupManagerID == uc.userID
 
-		groupResponse := GroupResponse{
-			ID:          string(group.GroupID),
-			Name:        string(group.GroupName),
-			MemberCount: memberCount,
-			IsCreator:   isCreator,
-		}
+			groupResponse := GroupResponse{
+				ID:          string(g.GroupID),
+				Name:        string(g.GroupName),
+				MemberCount: memberCount,
+				IsCreator:   isCreator,
+			}
 
-		result.Groups = append(result.Groups, groupResponse)
+			mu.Lock()
+			result.Groups = append(result.Groups, groupResponse)
+			mu.Unlock()
+		}(group)
 	}
+
+	wg.Wait()
 
 	return result, nil
 }

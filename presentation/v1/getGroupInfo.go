@@ -16,10 +16,10 @@ type GetGroupInfo struct {
 }
 
 type GroupInfoResponse struct {
-	GroupName      entity.GroupName     `json:"group_name" example:"テストグループ"`
-	Password       entity.GroupPassword `json:"password" example:"password123"`
-	GroupMembers   []usecase.Member     `json:"group_members"`
-	GroupManagerID entity.UserID        `json:"manager_id" example:"user456"`
+	GroupName      entity.GroupName     `json:"group_name" validate:"required" example:"グループ名"`
+	Password       entity.GroupPassword `json:"password" validate:"required" example:"password"`
+	GroupMembers   []usecase.Member     `json:"group_members" validate:"required"`
+	GroupManagerID entity.UserID        `json:"manager_id" validate:"required" example:"user_id"`
 }
 
 func NewGetGroupInfo(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *GetGroupInfo {

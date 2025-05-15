@@ -11,7 +11,7 @@ import (
 )
 
 type SigninRequest struct {
-	AuthID entity.AuthID `json:"auth_id" example:"auth456"`
+	AuthID entity.AuthID `json:"auth_id" validate:"required" example:"auth_id"`
 }
 
 type SigninResponse struct {

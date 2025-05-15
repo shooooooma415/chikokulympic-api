@@ -11,9 +11,9 @@ import (
 )
 
 type JoinGroupRequest struct {
-	GroupName     entity.GroupName     `json:"group_name" validate:"required" example:"テストグループ"`
-	GroupPassword entity.GroupPassword `json:"group_password" validate:"required" example:"password123"`
-	UserID        entity.UserID        `json:"user_id" validate:"required" example:"user123"`
+	GroupName     entity.GroupName     `json:"group_name" validate:"required" example:"group_name"`
+	GroupPassword entity.GroupPassword `json:"password" validate:"required" example:"password"`
+	UserID        entity.UserID        `json:"user_id" validate:"required" example:"user_id"`
 }
 
 type JoinGroupResponse struct {
