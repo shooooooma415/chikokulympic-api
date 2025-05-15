@@ -43,29 +43,34 @@ definitions:
           $ref: '#/definitions/usecase.Member'
         type: array
       group_name:
-        example: テストグループ
+        example: グループ名
         type: string
       manager_id:
-        example: user456
+        example: user_id
         type: string
       password:
-        example: password123
+        example: password
         type: string
+    required:
+    - group_members
+    - group_name
+    - manager_id
+    - password
     type: object
   v1.JoinGroupRequest:
     properties:
       group_name:
-        example: テストグループ
+        example: group_name
         type: string
-      group_password:
-        example: password123
+      password:
+        example: password
         type: string
       user_id:
-        example: user123
+        example: user_id
         type: string
     required:
     - group_name
-    - group_password
+    - password
     - user_id
     type: object
   v1.JoinGroupResponse:
@@ -84,18 +89,23 @@ definitions:
     type: object
   v1.PostGroupRequest:
     properties:
-      group_description:
-        example: これはテストグループです
+      description:
+        example: description
         type: string
       group_name:
-        example: テストグループ
-        type: string
-      group_password:
-        example: password123
+        example: group_name
         type: string
       manager_id:
-        example: user123
+        example: user_id
         type: string
+      password:
+        example: password
+        type: string
+    required:
+    - description
+    - group_name
+    - manager_id
+    - password
     type: object
   v1.PostGroupResponse:
     properties:
@@ -106,8 +116,10 @@ definitions:
   v1.SigninRequest:
     properties:
       auth_id:
-        example: auth456
+        example: auth_id
         type: string
+    required:
+    - auth_id
     type: object
   v1.SigninResponse:
     properties:
@@ -118,17 +130,21 @@ definitions:
   v1.SignupRequest:
     properties:
       auth_id:
-        example: auth456
+        example: auth_id
         type: string
       token:
-        example: fcm-token-123456
+        example: fcm_token
         type: string
       user_icon:
-        example: https://example.com/icon.png
+        example: user_icon
         type: string
       user_name:
-        example: 山田太郎
+        example: user_name
         type: string
+    required:
+    - auth_id
+    - token
+    - user_name
     type: object
   v1.SignupResponse:
     properties:
@@ -155,7 +171,7 @@ host: localhost:8080
 info:
   contact: {}
   description: This is a Chikokulympic server API.
-  title: Chikokulympic API
+  title: Chikokulympic-API
   version: "1.0"
 paths:
   /groups:

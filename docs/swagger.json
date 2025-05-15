@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a Chikokulympic server API.",
-        "title": "Chikokulympic API",
+        "title": "Chikokulympic-API",
         "contact": {},
         "version": "1.0"
     },
@@ -444,6 +444,12 @@
         },
         "v1.GroupInfoResponse": {
             "type": "object",
+            "required": [
+                "group_members",
+                "group_name",
+                "manager_id",
+                "password"
+            ],
             "properties": {
                 "group_members": {
                     "type": "array",
@@ -453,15 +459,15 @@
                 },
                 "group_name": {
                     "type": "string",
-                    "example": "テストグループ"
+                    "example": "グループ名"
                 },
                 "manager_id": {
                     "type": "string",
-                    "example": "user456"
+                    "example": "user_id"
                 },
                 "password": {
                     "type": "string",
-                    "example": "password123"
+                    "example": "password"
                 }
             }
         },
@@ -469,21 +475,21 @@
             "type": "object",
             "required": [
                 "group_name",
-                "group_password",
+                "password",
                 "user_id"
             ],
             "properties": {
                 "group_name": {
                     "type": "string",
-                    "example": "テストグループ"
+                    "example": "group_name"
                 },
-                "group_password": {
+                "password": {
                     "type": "string",
-                    "example": "password123"
+                    "example": "password"
                 },
                 "user_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "user_id"
                 }
             }
         },
@@ -510,22 +516,28 @@
         },
         "v1.PostGroupRequest": {
             "type": "object",
+            "required": [
+                "description",
+                "group_name",
+                "manager_id",
+                "password"
+            ],
             "properties": {
-                "group_description": {
+                "description": {
                     "type": "string",
-                    "example": "これはテストグループです"
+                    "example": "description"
                 },
                 "group_name": {
                     "type": "string",
-                    "example": "テストグループ"
-                },
-                "group_password": {
-                    "type": "string",
-                    "example": "password123"
+                    "example": "group_name"
                 },
                 "manager_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "user_id"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password"
                 }
             }
         },
@@ -540,10 +552,13 @@
         },
         "v1.SigninRequest": {
             "type": "object",
+            "required": [
+                "auth_id"
+            ],
             "properties": {
                 "auth_id": {
                     "type": "string",
-                    "example": "auth456"
+                    "example": "auth_id"
                 }
             }
         },
@@ -558,22 +573,27 @@
         },
         "v1.SignupRequest": {
             "type": "object",
+            "required": [
+                "auth_id",
+                "token",
+                "user_name"
+            ],
             "properties": {
                 "auth_id": {
                     "type": "string",
-                    "example": "auth456"
+                    "example": "auth_id"
                 },
                 "token": {
                     "type": "string",
-                    "example": "fcm-token-123456"
+                    "example": "fcm_token"
                 },
                 "user_icon": {
                     "type": "string",
-                    "example": "https://example.com/icon.png"
+                    "example": "user_icon"
                 },
                 "user_name": {
                     "type": "string",
-                    "example": "山田太郎"
+                    "example": "user_name"
                 }
             }
         },

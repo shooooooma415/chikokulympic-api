@@ -450,6 +450,12 @@ const docTemplate = `{
         },
         "v1.GroupInfoResponse": {
             "type": "object",
+            "required": [
+                "group_members",
+                "group_name",
+                "manager_id",
+                "password"
+            ],
             "properties": {
                 "group_members": {
                     "type": "array",
@@ -459,15 +465,15 @@ const docTemplate = `{
                 },
                 "group_name": {
                     "type": "string",
-                    "example": "テストグループ"
+                    "example": "グループ名"
                 },
                 "manager_id": {
                     "type": "string",
-                    "example": "user456"
+                    "example": "user_id"
                 },
                 "password": {
                     "type": "string",
-                    "example": "password123"
+                    "example": "password"
                 }
             }
         },
@@ -475,21 +481,21 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "group_name",
-                "group_password",
+                "password",
                 "user_id"
             ],
             "properties": {
                 "group_name": {
                     "type": "string",
-                    "example": "テストグループ"
+                    "example": "group_name"
                 },
-                "group_password": {
+                "password": {
                     "type": "string",
-                    "example": "password123"
+                    "example": "password"
                 },
                 "user_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "user_id"
                 }
             }
         },
@@ -516,22 +522,28 @@ const docTemplate = `{
         },
         "v1.PostGroupRequest": {
             "type": "object",
+            "required": [
+                "description",
+                "group_name",
+                "manager_id",
+                "password"
+            ],
             "properties": {
-                "group_description": {
+                "description": {
                     "type": "string",
-                    "example": "これはテストグループです"
+                    "example": "description"
                 },
                 "group_name": {
                     "type": "string",
-                    "example": "テストグループ"
-                },
-                "group_password": {
-                    "type": "string",
-                    "example": "password123"
+                    "example": "group_name"
                 },
                 "manager_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "user_id"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password"
                 }
             }
         },
@@ -546,10 +558,13 @@ const docTemplate = `{
         },
         "v1.SigninRequest": {
             "type": "object",
+            "required": [
+                "auth_id"
+            ],
             "properties": {
                 "auth_id": {
                     "type": "string",
-                    "example": "auth456"
+                    "example": "auth_id"
                 }
             }
         },
@@ -564,22 +579,27 @@ const docTemplate = `{
         },
         "v1.SignupRequest": {
             "type": "object",
+            "required": [
+                "auth_id",
+                "token",
+                "user_name"
+            ],
             "properties": {
                 "auth_id": {
                     "type": "string",
-                    "example": "auth456"
+                    "example": "auth_id"
                 },
                 "token": {
                     "type": "string",
-                    "example": "fcm-token-123456"
+                    "example": "fcm_token"
                 },
                 "user_icon": {
                     "type": "string",
-                    "example": "https://example.com/icon.png"
+                    "example": "user_icon"
                 },
                 "user_name": {
                     "type": "string",
-                    "example": "山田太郎"
+                    "example": "user_name"
                 }
             }
         },
@@ -623,7 +643,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Chikokulympic API",
+	Title:            "Chikokulympic-API",
 	Description:      "This is a Chikokulympic server API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
