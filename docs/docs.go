@@ -465,7 +465,7 @@ const docTemplate = `{
                 },
                 "group_name": {
                     "type": "string",
-                    "example": "グループ名"
+                    "example": "group_name"
                 },
                 "manager_id": {
                     "type": "string",
@@ -516,7 +516,7 @@ const docTemplate = `{
             "properties": {
                 "user_id": {
                     "type": "string",
-                    "example": "user123"
+                    "example": "user_id"
                 }
             }
         },
@@ -621,7 +621,7 @@ const docTemplate = `{
                 },
                 "user_name": {
                     "type": "string",
-                    "example": "山田太郎"
+                    "example": "user_name"
                 }
             }
         },

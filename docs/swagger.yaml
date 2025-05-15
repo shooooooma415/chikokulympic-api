@@ -43,7 +43,7 @@ definitions:
           $ref: '#/definitions/usecase.Member'
         type: array
       group_name:
-        example: グループ名
+        example: group_name
         type: string
       manager_id:
         example: user_id
@@ -82,7 +82,7 @@ definitions:
   v1.LeaveGroupRequest:
     properties:
       user_id:
-        example: user123
+        example: user_id
         type: string
     required:
     - user_id
@@ -158,7 +158,7 @@ definitions:
         example: https://example.com/icon.png
         type: string
       user_name:
-        example: 山田太郎
+        example: user_name
         type: string
     type: object
   v1.UpdateUserResponse:
