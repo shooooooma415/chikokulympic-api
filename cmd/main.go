@@ -22,7 +22,7 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	config.LoadEnvFileOrDefault(".env.local")
+	config.LoadFromFileOrEnv(".env.local")
 
 	uri := config.GetRequiredEnv("MONGO_URI")
 	dbName := config.GetRequiredEnv("MONGO_DATABASE")
