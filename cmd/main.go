@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	config.LoadEnvFileOrDefault(".env.local")
+	config.LoadFromFileOrEnv(".env.local")
 
 	uri := config.GetRequiredEnv("MONGO_URI")
 	dbName := config.GetRequiredEnv("MONGO_DATABASE")
@@ -40,7 +40,7 @@ func main() {
 	// サーバーの初期化とルーティング設定
 	authServer := serverV1.NewAuthServer(userRepo, groupRepo)
 	groupServer := serverV1.NewGroupServer(groupRepo, userRepo)
-	
+
 	groupServer.RegisterRoutes(e)
 	authServer.RegisterRoutes(e)
 
