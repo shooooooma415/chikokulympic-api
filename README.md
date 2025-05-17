@@ -21,7 +21,7 @@ BaseURL：https://chikokulympic-api-143996483854.us-central1.run.app
 └── docs           // ドキュメント
 ```
 
-### 技術スタック
+## 技術スタック
 - **言語**：Go  
 - **データベース**：MongoDB  
 - **コンテナ**：Docker / Docker Compose  
