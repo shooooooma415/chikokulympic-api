@@ -2,7 +2,7 @@
 
 ## 概要
 「遅刻リンピック (Chikoku Olympic)」のバックエンド API サービス
-BaseURL：https://chikokulympic-api-143996483854.us-central1.run.app
+　　BaseURL：https://chikokulympic-api-143996483854.us-central1.run.app
 
 ## アーキテクチャ
 このプロジェクトはクリーンアーキテクチャを踏襲している
