@@ -16,6 +16,5 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY --from=builder /app/main ./main
-COPY --from=builder /app/.env* ./ 
 
 CMD ["./main"]
