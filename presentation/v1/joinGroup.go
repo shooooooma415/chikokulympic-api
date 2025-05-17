@@ -11,13 +11,13 @@ import (
 )
 
 type JoinGroupRequest struct {
-	GroupName     entity.GroupName     `json:"group_name" validate:"required"`
-	GroupPassword entity.GroupPassword `json:"password" validate:"required"`
-	UserID        entity.UserID        `json:"user_id" validate:"required"`
+	GroupName     entity.GroupName     `json:"group_name" validate:"required" example:"group_name"`
+	GroupPassword entity.GroupPassword `json:"password" validate:"required" example:"password"`
+	UserID        entity.UserID        `json:"user_id" validate:"required" example:"user_id"`
 }
 
 type JoinGroupResponse struct {
-	GroupID entity.GroupID `json:"group_id"`
+	GroupID entity.GroupID `json:"group_id" example:"group123"`
 }
 
 type JoinGroup struct {
@@ -31,6 +31,17 @@ func NewJoinGroup(userRepo repository.UserRepository, groupRepo repository.Group
 		groupRepo: groupRepo,
 	}
 }
+
+// @Summary join group
+// @Description join a chosen group
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param request body JoinGroupRequest true "request"
+// @Success 200 {object} JoinGroupResponse
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /groups/join [post]
 func (j *JoinGroup) Handler(c echo.Context) error {
 	req := new(JoinGroupRequest)
 	if err := c.Bind(req); err != nil {

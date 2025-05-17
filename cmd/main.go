@@ -9,10 +9,18 @@ import (
 	serverV1 "chikokulympic-api/server/v1"
 
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	_ "chikokulympic-api/docs"
 )
 
+// @title Chikokulympic-API
+// @version 1.0
+// @description This is a Chikokulympic server API.
+// @host localhost:8080
+// @BasePath /
 func main() {
 	config.LoadFromFileOrEnv(".env.local")
 
@@ -29,15 +37,15 @@ func main() {
 
 	e := echo.New()
 
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello Chikokulympic-api"})
 	})
 
-	// リポジトリの初期化
 	userRepo := repository.NewUserRepository(db)
 	groupRepo := repository.NewGroupRepository(db)
 
-	// サーバーの初期化とルーティング設定
 	authServer := serverV1.NewAuthServer(userRepo, groupRepo)
 	groupServer := serverV1.NewGroupServer(groupRepo, userRepo)
 

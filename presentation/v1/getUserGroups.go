@@ -20,6 +20,16 @@ func NewGetUserGroups(groupRepo repository.GroupRepository) *GetUserGroups {
 	}
 }
 
+// @Summary get user groups
+// @Description get user groups
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param user_id path string true "user_id"
+// @Success 200 {array} usecase.UserGroup
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /users/{user_id}/groups [get]
 func (g *GetUserGroups) Handler(c echo.Context) error {
 	userIDParam := c.Param("user_id")
 

@@ -16,10 +16,10 @@ type GetGroupInfo struct {
 }
 
 type GroupInfoResponse struct {
-	GroupName      entity.GroupName     `json:"group_name" validate:"required"`
-	Password       entity.GroupPassword `json:"password" validate:"required"`
+	GroupName      entity.GroupName     `json:"group_name" validate:"required" example:"group_name"`
+	Password       entity.GroupPassword `json:"password" validate:"required" example:"password"`
 	GroupMembers   []usecase.Member     `json:"group_members" validate:"required"`
-	GroupManagerID entity.UserID        `json:"manager_id" validate:"required"`
+	GroupManagerID entity.UserID        `json:"manager_id" validate:"required" example:"user_id"`
 }
 
 func NewGetGroupInfo(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *GetGroupInfo {
@@ -29,6 +29,17 @@ func NewGetGroupInfo(groupRepo repository.GroupRepository, userRepo repository.U
 	}
 }
 
+// @Summary get group info
+// @Description get chosen group info
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param group_id path string true "group_id"
+// @Success 200 {object} GroupInfoResponse
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 404 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /groups/{group_id} [get]
 func (g *GetGroupInfo) Handler(c echo.Context) error {
 	groupIDParam := c.Param("group_id")
 	if groupIDParam == "" {

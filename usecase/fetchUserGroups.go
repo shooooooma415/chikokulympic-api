@@ -6,16 +6,21 @@ import (
 	"sync"
 )
 
+
 type GroupResponse struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	MemberCount int    `json:"member_count"`
-	IsCreator   bool   `json:"is_creator"`
+	ID          string `json:"id" example:"group123"`
+	Name        string `json:"name" example:"テストグループ"`
+	MemberCount int    `json:"member_count" example:"5"`
+	IsCreator   bool   `json:"is_creator" example:"true"`
 }
+
 
 type FetchUserGroupsResponse struct {
 	Groups []GroupResponse `json:"groups"`
 }
+
+
+type UserGroup FetchUserGroupsResponse
 
 type FetchUserGroupsUseCase interface {
 	Execute() (*FetchUserGroupsResponse, error)

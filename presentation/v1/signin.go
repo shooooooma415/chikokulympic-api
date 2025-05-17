@@ -11,11 +11,11 @@ import (
 )
 
 type SigninRequest struct {
-	AuthID entity.AuthID `json:"auth_id" validate:"required"`
+	AuthID entity.AuthID `json:"auth_id" validate:"required" example:"auth_id"`
 }
 
 type SigninResponse struct {
-	UserID entity.UserID `json:"user_id"`
+	UserID entity.UserID `json:"user_id" example:"user123"`
 }
 
 type Signin struct {
@@ -28,6 +28,16 @@ func NewSignin(userRepo repository.UserRepository) *Signin {
 	}
 }
 
+// @Summary signin user
+// @Description signin user from auth_id
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body SigninRequest true "request"
+// @Success 200 {object} SigninResponse
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /users/signin [post]
 func (s *Signin) Handler(c echo.Context) error {
 	req := new(SigninRequest)
 	if err := c.Bind(req); err != nil {

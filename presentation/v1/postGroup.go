@@ -12,14 +12,14 @@ import (
 )
 
 type PostGroupRequest struct {
-	GroupName        entity.GroupName        `json:"group_name" validate:"required"`
-	GroupPassword    entity.GroupPassword    `json:"password" validate:"required"`
-	ManagerID        entity.UserID           `json:"manager_id" validate:"required"`
-	GroupDescription entity.GroupDescription `json:"description" validate:"required"`
+	GroupName        entity.GroupName        `json:"group_name" validate:"required" example:"group_name"`
+	GroupPassword    entity.GroupPassword    `json:"password" validate:"required" example:"password"`
+	ManagerID        entity.UserID           `json:"manager_id" validate:"required" example:"user_id"`
+	GroupDescription entity.GroupDescription `json:"description" validate:"required" example:"description"`
 }
 
 type PostGroupResponse struct {
-	GroupID entity.GroupID `json:"group_id"`
+	GroupID entity.GroupID `json:"group_id" example:"group123"`
 }
 
 type PostGroup struct {
@@ -34,6 +34,16 @@ func NewPostGroup(groupRepo repository.GroupRepository, userRepo repository.User
 	}
 }
 
+// @Summary create group
+// @Description create a new group
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param request body PostGroupRequest true "request"
+// @Success 201 {object} PostGroupResponse
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /groups [post]
 func (p *PostGroup) Handler(c echo.Context) error {
 	req := new(PostGroupRequest)
 	if err := c.Bind(req); err != nil {

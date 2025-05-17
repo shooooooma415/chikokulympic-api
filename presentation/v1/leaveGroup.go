@@ -11,7 +11,7 @@ import (
 )
 
 type LeaveGroupRequest struct {
-	UserID entity.UserID `json:"user_id" validate:"required"`
+	UserID entity.UserID `json:"user_id" validate:"required" example:"user_id"`
 }
 
 type LeaveGroup struct {
@@ -24,6 +24,17 @@ func NewLeaveGroup(groupRepo repository.GroupRepository) *LeaveGroup {
 	}
 }
 
+// @Summary leave group
+// @Description leave a chosen group
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param group_id path string true "group_id"
+// @Param request body LeaveGroupRequest true "request"
+// @Success 200 {object} nil
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /groups/{group_id}/leave [post]
 func (l *LeaveGroup) Handler(c echo.Context) error {
 	// パスパラメータからgroup_idを取得
 	groupIDParam := c.Param("group_id")
