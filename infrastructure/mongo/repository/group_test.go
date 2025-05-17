@@ -16,7 +16,7 @@ func TestGroupRepository(t *testing.T) {
 	// 各テストで共通のセットアップ処理
 	db, cleanup := testUtils.SetupTestDB(t)
 	defer cleanup()
-	repo := repository.NewGroupRepo(db)
+	repo := repository.NewGroupRepository(db)
 
 	t.Run("FindGroupByGroupName", func(t *testing.T) {
 		testCases := []struct {
@@ -360,5 +360,71 @@ func TestGroupRepository(t *testing.T) {
 		// クリーンアップ
 		_, err := db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": bson.M{"$in": []string{"multi-group-id-1", "multi-group-id-2", "multi-group-id-3"}}})
 		assert.NoError(t, err)
+	})
+
+	t.Run("FindGroupByGroupID", func(t *testing.T) {
+		testCases := []struct {
+			name        string
+			group       *entity.Group
+			groupID     entity.GroupID
+			expected    *entity.Group
+			shouldError bool
+		}{
+			{
+				name: "正常系: 存在するグループIDで検索",
+				group: &entity.Group{
+					GroupID:          "test-group-id-for-id-search",
+					GroupName:        "TestGroupIDSearch",
+					GroupPassword:    "password123",
+					GroupManagerID:   "manager-user-id-1",
+					GroupDescription: "Test group description for ID search",
+					GroupMembers:     []entity.UserID{"member1-id", "member2-id"},
+					GroupEvents:      []entity.EventID{"event1-id", "event2-id"},
+				},
+				groupID:     "test-group-id-for-id-search",
+				expected:    nil, // 後でセット
+				shouldError: false,
+			},
+			{
+				name:        "異常系: 存在しないグループIDで検索",
+				group:       nil,
+				groupID:     "non-existent-group-id",
+				expected:    nil,
+				shouldError: true,
+			},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				// テストデータのセットアップ
+				if tc.group != nil {
+					_, err := db.Collection("groups").InsertOne(context.Background(), tc.group)
+					assert.NoError(t, err)
+					tc.expected = tc.group
+				}
+
+				// テスト実行
+				foundGroup, err := repo.FindGroupByGroupID(tc.groupID)
+
+				// 結果の検証
+				if tc.shouldError {
+					assert.Error(t, err)
+					assert.Nil(t, foundGroup)
+				} else {
+					assert.NoError(t, err)
+					assert.NotNil(t, foundGroup)
+					assert.Equal(t, tc.expected.GroupID, foundGroup.GroupID)
+					assert.Equal(t, tc.expected.GroupName, foundGroup.GroupName)
+					assert.Equal(t, tc.expected.GroupManagerID, foundGroup.GroupManagerID)
+					assert.Equal(t, tc.expected.GroupDescription, foundGroup.GroupDescription)
+				}
+
+				// クリーンアップ
+				if tc.group != nil {
+					_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": tc.group.GroupID})
+					assert.NoError(t, err)
+				}
+			})
+		}
 	})
 }

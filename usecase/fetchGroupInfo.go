@@ -1,0 +1,75 @@
+package usecase
+
+import (
+	"chikokulympic-api/domain/entity"
+	"chikokulympic-api/domain/repository"
+	"sync"
+)
+
+type Member struct {
+	ID   entity.UserID   `json:"id"`
+	Name entity.UserName `json:"name"`
+	Icon entity.UserIcon `json:"icon"`
+}
+
+type GroupInfoResponse struct {
+	GroupName      entity.GroupName     `json:"group_name"`
+	Password       entity.GroupPassword `json:"password"`
+	Members        []Member             `json:"members"`
+	GroupManagerID entity.UserID        `json:"group_manager_id"`
+}
+
+type FetchGroupInfoUsecase struct {
+	groupRepo repository.GroupRepository
+	userRepo  repository.UserRepository
+}
+
+func NewFetchGroupInfoUsecase(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *FetchGroupInfoUsecase {
+	return &FetchGroupInfoUsecase{
+		groupRepo: groupRepo,
+		userRepo:  userRepo,
+	}
+}
+
+func (u *FetchGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoResponse, error) {
+	group, err := u.groupRepo.FindGroupByGroupID(groupID)
+	if err != nil {
+		return nil, err
+	}
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	members := make([]Member, 0, len(group.GroupMembers))
+
+	for _, memberID := range group.GroupMembers {
+		wg.Add(1)
+		go func(id entity.UserID) {
+			defer wg.Done()
+
+			user, err := u.userRepo.FindUserByUserID(id)
+			if err != nil {
+				return
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+			members = append(members, Member{
+				ID:   user.UserID,
+				Name: user.UserName,
+				Icon: user.UserIcon,
+			})
+		}(memberID)
+	}
+
+	wg.Wait()
+
+	response := &GroupInfoResponse{
+		GroupName:      group.GroupName,
+		Password:       group.GroupPassword,
+		Members:        members,
+		GroupManagerID: group.GroupManagerID,
+	}
+
+	return response, nil
+}
