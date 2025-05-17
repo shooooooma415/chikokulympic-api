@@ -9,6 +9,8 @@ services:
       - "8080:8080"
     depends_on:
       - mongo
+    env_file:
+      - .env.local
 
   mongo:
     image: mongo:6

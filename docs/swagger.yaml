@@ -1,0 +1,424 @@
+basePath: /
+definitions:
+  middleware.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  usecase.GroupResponse:
+    properties:
+      id:
+        example: group123
+        type: string
+      is_creator:
+        example: true
+        type: boolean
+      member_count:
+        example: 5
+        type: integer
+      name:
+        example: テストグループ
+        type: string
+    type: object
+  usecase.Member:
+    properties:
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  usecase.UserGroup:
+    properties:
+      groups:
+        items:
+          $ref: '#/definitions/usecase.GroupResponse'
+        type: array
+    type: object
+  v1.GroupInfoResponse:
+    properties:
+      group_members:
+        items:
+          $ref: '#/definitions/usecase.Member'
+        type: array
+      group_name:
+        example: group_name
+        type: string
+      manager_id:
+        example: user_id
+        type: string
+      password:
+        example: password
+        type: string
+    required:
+    - group_members
+    - group_name
+    - manager_id
+    - password
+    type: object
+  v1.JoinGroupRequest:
+    properties:
+      group_name:
+        example: group_name
+        type: string
+      password:
+        example: password
+        type: string
+      user_id:
+        example: user_id
+        type: string
+    required:
+    - group_name
+    - password
+    - user_id
+    type: object
+  v1.JoinGroupResponse:
+    properties:
+      group_id:
+        example: group123
+        type: string
+    type: object
+  v1.LeaveGroupRequest:
+    properties:
+      user_id:
+        example: user_id
+        type: string
+    required:
+    - user_id
+    type: object
+  v1.PostGroupRequest:
+    properties:
+      description:
+        example: description
+        type: string
+      group_name:
+        example: group_name
+        type: string
+      manager_id:
+        example: user_id
+        type: string
+      password:
+        example: password
+        type: string
+    required:
+    - description
+    - group_name
+    - manager_id
+    - password
+    type: object
+  v1.PostGroupResponse:
+    properties:
+      group_id:
+        example: group123
+        type: string
+    type: object
+  v1.SigninRequest:
+    properties:
+      auth_id:
+        example: auth_id
+        type: string
+    required:
+    - auth_id
+    type: object
+  v1.SigninResponse:
+    properties:
+      user_id:
+        example: user123
+        type: string
+    type: object
+  v1.SignupRequest:
+    properties:
+      auth_id:
+        example: auth_id
+        type: string
+      token:
+        example: fcm_token
+        type: string
+      user_icon:
+        example: user_icon
+        type: string
+      user_name:
+        example: user_name
+        type: string
+    required:
+    - auth_id
+    - token
+    - user_name
+    type: object
+  v1.SignupResponse:
+    properties:
+      user_id:
+        example: user123
+        type: string
+    type: object
+  v1.UpdateUserRequest:
+    properties:
+      user_icon:
+        example: https://example.com/icon.png
+        type: string
+      user_name:
+        example: user_name
+        type: string
+    type: object
+  v1.UpdateUserResponse:
+    properties:
+      user_id:
+        example: user123
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a Chikokulympic server API.
+  title: Chikokulympic-API
+  version: "1.0"
+paths:
+  /groups:
+    post:
+      consumes:
+      - application/json
+      description: create a new group
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.PostGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.PostGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: create group
+      tags:
+      - groups
+  /groups/{group_id}:
+    get:
+      consumes:
+      - application/json
+      description: get chosen group info
+      parameters:
+      - description: group_id
+        in: path
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.GroupInfoResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: get group info
+      tags:
+      - groups
+  /groups/{group_id}/leave:
+    post:
+      consumes:
+      - application/json
+      description: leave a chosen group
+      parameters:
+      - description: group_id
+        in: path
+        name: group_id
+        required: true
+        type: string
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.LeaveGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: leave group
+      tags:
+      - groups
+  /groups/join:
+    post:
+      consumes:
+      - application/json
+      description: join a chosen group
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.JoinGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.JoinGroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: join group
+      tags:
+      - groups
+  /users:
+    put:
+      consumes:
+      - application/json
+      description: update user information(icon, name)
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.UpdateUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: update user
+      tags:
+      - users
+  /users/{user_id}/groups:
+    get:
+      consumes:
+      - application/json
+      description: get user groups
+      parameters:
+      - description: user_id
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usecase.UserGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: get user groups
+      tags:
+      - groups
+  /users/signin:
+    post:
+      consumes:
+      - application/json
+      description: signin user from auth_id
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SigninRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.SigninResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: signin user
+      tags:
+      - users
+  /users/signup:
+    post:
+      consumes:
+      - application/json
+      description: subscribe user to the service
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.SignupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: subscribe user
+      tags:
+      - users
+swagger: "2.0"

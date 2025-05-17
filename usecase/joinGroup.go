@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+
 type JoinGroupUseCase interface {
 	Execute() (*entity.GroupID, error)
 }
@@ -25,6 +26,8 @@ func NewJoinGroupUseCase(groupRepo repository.GroupRepository, userRepo reposito
 		group:     group,
 	}
 }
+
+
 
 func (uc *JoinGroupUseCaseImpl) Execute() (*entity.GroupID, error) {
 	groupFound, err := uc.groupRepo.FindGroupByGroupName(&uc.group.GroupName)

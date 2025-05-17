@@ -8,28 +8,29 @@ import (
 )
 
 type AuthServer struct {
-	signup     *presentationV1.Signup
-	signin     *presentationV1.Signin
-	updateUser *presentationV1.UpdateUser
+	signup        *presentationV1.Signup
+	signin        *presentationV1.Signin
+	updateUser    *presentationV1.UpdateUser
+	getUserGroups *presentationV1.GetUserGroups
 }
 
-func NewAuthServer(userRepo repository.UserRepository) *AuthServer {
+func NewAuthServer(userRepo repository.UserRepository, groupRepo repository.GroupRepository) *AuthServer {
 	return &AuthServer{
-		signup:     presentationV1.NewSignup(userRepo),
-		signin:     presentationV1.NewSignin(userRepo),
-		updateUser: presentationV1.NewUpdateUser(userRepo),
+		signup:        presentationV1.NewSignup(userRepo),
+		signin:        presentationV1.NewSignin(userRepo),
+		updateUser:    presentationV1.NewUpdateUser(userRepo),
+		getUserGroups: presentationV1.NewGetUserGroups(groupRepo),
 	}
 }
 
 func (s *AuthServer) RegisterRoutes(e *echo.Echo) {
-	authGroup := e.Group("/auth")
+	authGroup := e.Group("/users")
 
-	// サインアップ用エンドポイント
 	authGroup.POST("/signup", s.signup.Handler)
 
-	// サインイン用エンドポイント
 	authGroup.POST("/signin", s.signin.Handler)
 
-	// ユーザー情報更新用エンドポイント
 	authGroup.PUT("", s.updateUser.Handler)
+
+	authGroup.GET("/:user_id/groups", s.getUserGroups.Handler)
 }

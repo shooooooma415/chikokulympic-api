@@ -16,7 +16,7 @@ type GroupRepo struct {
 	groupCollection *mongo.Collection
 }
 
-func NewGroupRepo(db *mongo.Database) repo.GroupRepository {
+func NewGroupRepository(db *mongo.Database) repo.GroupRepository {
 	return &GroupRepo{
 		groupCollection: db.Collection("groups"),
 	}
@@ -107,4 +107,21 @@ func (gr *GroupRepo) DeleteGroup(group *entity.Group) (*entity.Group, error) {
 	}
 
 	return group, nil
+}
+
+func (gr *GroupRepo) FindGroupByGroupID(groupID entity.GroupID) (*entity.Group, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var group entity.Group
+	filter := bson.M{"group_id": groupID}
+	err := gr.groupCollection.FindOne(ctx, filter).Decode(&group)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("group not found with ID: %s", string(groupID))
+		}
+		return nil, fmt.Errorf("error finding group by ID: %w", err)
+	}
+
+	return &group, nil
 }

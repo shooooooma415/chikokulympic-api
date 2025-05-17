@@ -18,16 +18,11 @@ type MongoConfig struct {
 	Database string
 }
 
-// NewMongoConfig はMongoDBの設定を生成します
-// 引数にファイル名を指定すると、そのファイルから環境変数を読み込みます
-// ファイル名が空の場合は、環境変数のみを使用します
 func NewMongoConfig(envFile string) *MongoConfig {
-	// 環境変数ファイルを読み込む（指定されている場合）
 	if envFile != "" {
-		config.LoadEnvFileOrDefault(envFile)
+		config.LoadFromFileOrEnv(envFile)
 	}
 
-	// 環境変数からMongoDBの接続情報を取得
 	uri := config.GetRequiredEnv("MONGO_URI")
 	database := config.GetRequiredEnv("MONGO_DATABASE")
 
@@ -67,7 +62,6 @@ func DisconnectMongoDB(client *mongo.Client) error {
 	return nil
 }
 
-// GetMongoDBConnectionWithEnvFile は指定された環境変数ファイルを読み込んでMongoDB接続を取得します
 func GetMongoDBConnectionWithEnvFile(envFile string) (*mongo.Database, *mongo.Client, error) {
 	config := NewMongoConfig(envFile)
 	db, err := ConnectMongoDB(config)
