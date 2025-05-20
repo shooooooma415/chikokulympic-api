@@ -16,9 +16,9 @@ type EventRepo struct {
 	eventCollection *mongo.Collection
 }
 
-func NewEventRepository(db *mongo.Database) repo.GroupRepository {
-	return &GroupRepo{
-		groupCollection: db.Collection("events"),
+func NewEventRepository(db *mongo.Database) repo.EventRepository {
+	return &EventRepo{
+		eventCollection: db.Collection("events"),
 	}
 }
 
@@ -39,7 +39,7 @@ func (er *EventRepo) FindEventByEventID(eventID entity.EventID) (*entity.Event, 
 	return &event, nil
 }
 
-func (er *EventRepo) CreateEvent(event *entity.Event) (*entity.Event, error) {
+func (er *EventRepo) CreateEvent(event entity.Event) (*entity.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -48,23 +48,23 @@ func (er *EventRepo) CreateEvent(event *entity.Event) (*entity.Event, error) {
 		return nil, fmt.Errorf("error creating event: %w", err)
 	}
 
-	return event, nil
+	return &event, nil
 }
 
-func (er *EventRepo) DeleteEvent(eventID entity.EventID) error {
+func (er *EventRepo) DeleteEvent(event entity.Event) (*entity.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"_id": eventID}
+	filter := bson.M{"_id": event.EventID}
 	_, err := er.eventCollection.DeleteOne(ctx, filter)
 	if err != nil {
-		return fmt.Errorf("error deleting event: %w", err)
+		return nil, fmt.Errorf("error deleting event: %w", err)
 	}
 
-	return nil
+	return &event, nil
 }
 
-func (er *EventRepo) UpdateEvent(event *entity.Event) (*entity.Event, error) {
+func (er *EventRepo) UpdateEvent(event entity.Event) (*entity.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -76,27 +76,5 @@ func (er *EventRepo) UpdateEvent(event *entity.Event) (*entity.Event, error) {
 		return nil, fmt.Errorf("error updating event: %w", err)
 	}
 
-	return event, nil
-}
-
-
-
-func (er *EventRepo) FindEventsByGroupID(groupID entity.GroupID) ([]*entity.Event, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	var events []*entity.Event
-	filter := bson.M{"group_id": groupID}
-
-	cursor, err := er.eventCollection.Find(ctx, filter)
-	if err != nil {
-		return nil, fmt.Errorf("error finding events by group ID: %w", err)
-	}
-	defer cursor.Close(ctx)
-
-	if err := cursor.All(ctx, &events); err != nil {
-		return nil, fmt.Errorf("error decoding events: %w", err)
-	}
-
-	return events, nil
+	return &event, nil
 }

@@ -22,16 +22,16 @@ func NewGroupRepository(db *mongo.Database) repo.GroupRepository {
 	}
 }
 
-func (gr *GroupRepo) FindGroupByGroupName(groupName *entity.GroupName) (*entity.Group, error) {
+func (gr *GroupRepo) FindGroupByGroupName(groupName entity.GroupName) (*entity.Group, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var group entity.Group
-	filter := bson.M{"name": string(*groupName)} // ポインタをstring型に変換
+	filter := bson.M{"name": string(groupName)}
 	err := gr.groupCollection.FindOne(ctx, filter).Decode(&group)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("group not found with name: %s", string(*groupName))
+			return nil, fmt.Errorf("group not found with name: %s", string(groupName))
 		}
 		return nil, fmt.Errorf("error finding group by name: %w", err)
 	}
@@ -62,13 +62,13 @@ func (gr *GroupRepo) FindGroupsByUserID(userID entity.UserID) ([]*entity.Group, 
 	}
 
 	if len(groups) == 0 {
-		return []*entity.Group{}, nil // 空の配列を返す（nilではなく）
+		return []*entity.Group{}, nil 
 	}
 
 	return groups, nil
 }
 
-func (gr *GroupRepo) CreateGroup(group *entity.Group) (*entity.Group, error) {
+func (gr *GroupRepo) CreateGroup(group entity.Group) (*entity.Group, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -77,10 +77,10 @@ func (gr *GroupRepo) CreateGroup(group *entity.Group) (*entity.Group, error) {
 		return nil, fmt.Errorf("error creating group: %w", err)
 	}
 
-	return group, nil
+	return &group, nil
 }
 
-func (gr *GroupRepo) UpdateGroup(group *entity.Group) (*entity.Group, error) {
+func (gr *GroupRepo) UpdateGroup(group entity.Group) (*entity.Group, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -92,10 +92,10 @@ func (gr *GroupRepo) UpdateGroup(group *entity.Group) (*entity.Group, error) {
 		return nil, fmt.Errorf("error updating group: %w", err)
 	}
 
-	return group, nil
+	return &group, nil
 }
 
-func (gr *GroupRepo) DeleteGroup(group *entity.Group) (*entity.Group, error) {
+func (gr *GroupRepo) DeleteGroup(group entity.Group) (*entity.Group, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -106,7 +106,7 @@ func (gr *GroupRepo) DeleteGroup(group *entity.Group) (*entity.Group, error) {
 		return nil, fmt.Errorf("error deleting group: %w", err)
 	}
 
-	return group, nil
+	return &group, nil
 }
 
 func (gr *GroupRepo) FindGroupByGroupID(groupID entity.GroupID) (*entity.Group, error) {

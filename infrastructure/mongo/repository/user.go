@@ -46,7 +46,7 @@ func (r *userRepository) FindUserByAuthID(authID entity.AuthID) (*entity.User, e
 	return &user, nil
 }
 
-func (r *userRepository) CreateUser(user *entity.User) (*entity.User, error) {
+func (r *userRepository) CreateUser(user entity.User) (*entity.User, error) {
 	result, err := r.userCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		return nil, err
@@ -56,12 +56,12 @@ func (r *userRepository) CreateUser(user *entity.User) (*entity.User, error) {
 		return nil, fmt.Errorf("failed to insert user")
 	}
 
-	return user, nil
+	return &user, nil
 }
 
-func (r *userRepository) DeleteUser(userID *entity.UserID) (*entity.User, error) {
+func (r *userRepository) DeleteUser(userID entity.UserID) (*entity.User, error) {
 	var deletedUser entity.User
-	filter := bson.M{"user_id": *userID}
+	filter := bson.M{"user_id": userID}
 
 	err := r.userCollection.FindOneAndDelete(context.Background(), filter).Decode(&deletedUser)
 	if err != nil {
@@ -71,7 +71,7 @@ func (r *userRepository) DeleteUser(userID *entity.UserID) (*entity.User, error)
 	return &deletedUser, nil
 }
 
-func (r *userRepository) UpdateUser(user *entity.User) (*entity.User, error) {
+func (r *userRepository) UpdateUser(user entity.User) (*entity.User, error) {
 	filter := bson.M{"user_id": user.UserID}
 	update := bson.M{"$set": user}
 
