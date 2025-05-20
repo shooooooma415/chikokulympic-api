@@ -9,6 +9,7 @@ import (
 	repo "chikokulympic-api/domain/repository"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -47,6 +48,11 @@ func (r *userRepository) FindUserByAuthID(authID entity.AuthID) (*entity.User, e
 }
 
 func (r *userRepository) CreateUser(user entity.User) (*entity.User, error) {
+	// 新しいObjectIDを生成して文字列に変換し、UserIDにセット
+	if user.UserID == "" {
+		user.UserID = entity.UserID(primitive.NewObjectID().Hex())
+	}
+
 	result, err := r.userCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		return nil, err
