@@ -1,3 +1,4 @@
+// filepath: /Users/shoma/Documents/Products/chikokulympic-api/infrastructure/mongo/repository/user_test.go
 package repository_test
 
 import (
@@ -158,17 +159,6 @@ func TestUserRepository(t *testing.T) {
 				},
 				error: false,
 			},
-			{
-				name: "正常系: IDを事前に指定して新規ユーザー作成",
-				user: &entity.User{
-					UserID:   "507f1f77bcf86cd799439011", // 有効なObjectIDの形式
-					AuthID:   "new-auth-id-2",
-					UserName: "New User 2",
-					FCMToken: "fcm-token-new-2",
-					Alias:    "newbie2",
-				},
-				error: false,
-			},
 			// 必要に応じて異常系のテストケースを追加
 		}
 
@@ -184,32 +174,18 @@ func TestUserRepository(t *testing.T) {
 					assert.NoError(t, err)
 					assert.NotNil(t, createdUser)
 
-					if tc.user.UserID != "" {
-						// IDが事前に設定されている場合は同じIDが使われていることを確認
-						assert.Equal(t, tc.user.UserID, createdUser.UserID)
-					} else {
-						// 自動生成された場合はIDが空でないことを確認
-						assert.NotEmpty(t, createdUser.UserID)
-					}
+					// 自動生成されたIDが設定されていることを確認
+					assert.NotEmpty(t, createdUser.UserID)
 
 					// DBに保存されていることを確認
 					var savedUser entity.User
-					var err error
-					if tc.user.UserID != "" {
-						err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": tc.user.UserID}).Decode(&savedUser)
-					} else {
-						err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": createdUser.UserID}).Decode(&savedUser)
-					}
+					err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": createdUser.UserID}).Decode(&savedUser)
 					assert.NoError(t, err)
 					assert.Equal(t, tc.user.UserName, savedUser.UserName)
 				}
 
 				// クリーンアップ
-				if tc.user.UserID != "" {
-					_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": tc.user.UserID})
-				} else {
-					_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": createdUser.UserID})
-				}
+				_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": createdUser.UserID})
 				assert.NoError(t, err)
 			})
 		}

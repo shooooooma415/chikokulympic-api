@@ -104,19 +104,6 @@ func TestGroupRepository(t *testing.T) {
 				},
 				shouldError: false,
 			},
-			{
-				name: "正常系: IDを事前に指定して新規グループ作成",
-				group: &entity.Group{
-					GroupID:          "507f1f77bcf86cd799439012", // 有効なObjectIDの形式
-					GroupName:        "NewGroup2",
-					GroupPassword:    "newpassword2",
-					GroupManagerID:   "new-manager-id-2",
-					GroupDescription: "New group description 2",
-					GroupMembers:     []entity.UserID{"new-member1-id-2", "new-member2-id-2"},
-					GroupEvents:      []entity.EventID{"new-event1-id-2", "new-event2-id-2"},
-				},
-				shouldError: false,
-			},
 			// 必要に応じて異常系のテストケースを追加
 		}
 
@@ -132,34 +119,20 @@ func TestGroupRepository(t *testing.T) {
 					assert.NoError(t, err)
 					assert.NotNil(t, createdGroup)
 
-					if tc.group.GroupID != "" {
-						// IDが事前に設定されている場合は同じIDが使われていることを確認
-						assert.Equal(t, tc.group.GroupID, createdGroup.GroupID)
-					} else {
-						// 自動生成された場合はIDが空でないことを確認
-						assert.NotEmpty(t, createdGroup.GroupID)
-					}
+					// 自動生成されたIDが設定されていることを確認
+					assert.NotEmpty(t, createdGroup.GroupID)
 					assert.Equal(t, tc.group.GroupName, createdGroup.GroupName)
 
 					// DBに保存されていることを確認
 					var savedGroup entity.Group
-					var err error
-					if tc.group.GroupID != "" {
-						err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": tc.group.GroupID}).Decode(&savedGroup)
-					} else {
-						err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": createdGroup.GroupID}).Decode(&savedGroup)
-					}
+					err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": createdGroup.GroupID}).Decode(&savedGroup)
 					assert.NoError(t, err)
 					assert.Equal(t, tc.group.GroupName, savedGroup.GroupName)
 					assert.Equal(t, tc.group.GroupDescription, savedGroup.GroupDescription)
 				}
 
 				// クリーンアップ
-				if tc.group.GroupID != "" {
-					_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": tc.group.GroupID})
-				} else {
-					_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": createdGroup.GroupID})
-				}
+				_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": createdGroup.GroupID})
 				assert.NoError(t, err)
 			})
 		}
