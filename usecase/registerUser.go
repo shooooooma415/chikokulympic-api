@@ -27,5 +27,5 @@ func (uc *RegisterUserUseCaseImpl) Execute() (*entity.User, error) {
 	userID := uuid.New().String()
 	uc.user.UserID = entity.UserID(userID)
 
-	return uc.userRepo.CreateUser(uc.user)
+	return uc.userRepo.CreateUser(*uc.user)
 }
