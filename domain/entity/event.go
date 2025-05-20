@@ -22,7 +22,7 @@ type VotedMember struct {
 }
 
 type Event struct {
-	EventID              EventID              `bson:"event_id" json:"event_id"`
+	EventID              EventID              `bson:"_id" json:"event_id"`
 	EventTitle           EventTitle           `bson:"event_title" json:"event_title"`
 	EventDescription     EventDescription     `bson:"event_description" json:"event_description"`
 	EventLocationName    LocationName         `bson:"event_location_name" json:"event_location_name"`

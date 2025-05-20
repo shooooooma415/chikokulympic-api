@@ -8,7 +8,7 @@ type GroupMembers []UserID
 type GroupEvents []EventID
 
 type Group struct {
-	GroupID          GroupID          `bson:"group_id" json:"group_id" example:"group123"`
+	GroupID          GroupID          `bson:"_id" json:"group_id" example:"group123"`
 	GroupName        GroupName        `bson:"name" json:"group_name" example:"テストグループ"`
 	GroupPassword    GroupPassword    `bson:"password" json:"group_password" example:"password123"`
 	GroupManagerID   UserID           `bson:"manager_id" json:"group_manager_id" example:"user456"`
