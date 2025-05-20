@@ -59,9 +59,9 @@ func (r *userRepository) CreateUser(user entity.User) (*entity.User, error) {
 	return &user, nil
 }
 
-func (r *userRepository) DeleteUser(userID entity.UserID) (*entity.User, error) {
+func (r *userRepository) DeleteUser(user entity.User) (*entity.User, error) {
 	var deletedUser entity.User
-	filter := bson.M{"user_id": userID}
+	filter := bson.M{"user_id": user.UserID}
 
 	err := r.userCollection.FindOneAndDelete(context.Background(), filter).Decode(&deletedUser)
 	if err != nil {
