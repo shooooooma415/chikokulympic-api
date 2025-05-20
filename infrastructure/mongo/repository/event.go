@@ -44,10 +44,8 @@ func (er *EventRepo) CreateEvent(event entity.Event) (*entity.Event, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// 新しいObjectIDを生成して文字列に変換し、EventIDにセット
-	if event.EventID == "" {
-		event.EventID = entity.EventID(primitive.NewObjectID().Hex())
-	}
+	// 常に新しいObjectIDを生成して文字列に変換し、EventIDにセットする
+	event.EventID = entity.EventID(primitive.NewObjectID().Hex())
 
 	_, err := er.eventCollection.InsertOne(ctx, event)
 	if err != nil {

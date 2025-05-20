@@ -48,10 +48,8 @@ func (r *userRepository) FindUserByAuthID(authID entity.AuthID) (*entity.User, e
 }
 
 func (r *userRepository) CreateUser(user entity.User) (*entity.User, error) {
-	// 新しいObjectIDを生成して文字列に変換し、UserIDにセット
-	if user.UserID == "" {
-		user.UserID = entity.UserID(primitive.NewObjectID().Hex())
-	}
+	// 常に新しいObjectIDを生成して文字列に変換し、UserIDにセットする
+	user.UserID = entity.UserID(primitive.NewObjectID().Hex())
 
 	result, err := r.userCollection.InsertOne(context.Background(), user)
 	if err != nil {
