@@ -276,8 +276,7 @@ func TestUserRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				userID := tc.user.UserID
-				deletedUser, err := repo.DeleteUser(userID)
+				deletedUser, err := repo.DeleteUser(*tc.user)
 
 				// 結果の検証
 				if tc.error {
@@ -289,7 +288,7 @@ func TestUserRepository(t *testing.T) {
 
 					// DBから削除されたことを確認
 					var count int64
-					count, err = db.Collection("users").CountDocuments(context.Background(), bson.M{"user_id": userID})
+					count, err = db.Collection("users").CountDocuments(context.Background(), bson.M{"user_id": tc.user.UserID})
 					assert.NoError(t, err)
 					assert.Equal(t, int64(0), count)
 				}
