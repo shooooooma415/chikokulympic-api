@@ -60,7 +60,7 @@ func TestGroupRepository(t *testing.T) {
 				}
 
 				// テスト実行
-				foundGroup, err := repo.FindGroupByGroupName(&tc.groupName)
+				foundGroup, err := repo.FindGroupByGroupName(tc.groupName)
 
 				// 結果の検証
 				if tc.shouldError {
@@ -94,7 +94,7 @@ func TestGroupRepository(t *testing.T) {
 			{
 				name: "正常系: 新規グループ作成",
 				group: &entity.Group{
-					GroupID:          "new-group-id",
+					// GroupIDはリポジトリで自動生成されるので設定しない
 					GroupName:        "NewGroup",
 					GroupPassword:    "newpassword",
 					GroupManagerID:   "new-manager-id",
@@ -110,7 +110,7 @@ func TestGroupRepository(t *testing.T) {
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
 				// テスト実行
-				createdGroup, err := repo.CreateGroup(tc.group)
+				createdGroup, err := repo.CreateGroup(*tc.group)
 
 				// 結果の検証
 				if tc.shouldError {
@@ -118,19 +118,21 @@ func TestGroupRepository(t *testing.T) {
 				} else {
 					assert.NoError(t, err)
 					assert.NotNil(t, createdGroup)
-					assert.Equal(t, tc.group.GroupID, createdGroup.GroupID)
+
+					// 自動生成されたIDが設定されていることを確認
+					assert.NotEmpty(t, createdGroup.GroupID)
 					assert.Equal(t, tc.group.GroupName, createdGroup.GroupName)
 
 					// DBに保存されていることを確認
 					var savedGroup entity.Group
-					err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": tc.group.GroupID}).Decode(&savedGroup)
+					err = db.Collection("groups").FindOne(context.Background(), bson.M{"group_id": createdGroup.GroupID}).Decode(&savedGroup)
 					assert.NoError(t, err)
 					assert.Equal(t, tc.group.GroupName, savedGroup.GroupName)
 					assert.Equal(t, tc.group.GroupDescription, savedGroup.GroupDescription)
 				}
 
 				// クリーンアップ
-				_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": tc.group.GroupID})
+				_, err = db.Collection("groups").DeleteMany(context.Background(), bson.M{"group_id": createdGroup.GroupID})
 				assert.NoError(t, err)
 			})
 		}
@@ -175,7 +177,7 @@ func TestGroupRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				updatedGroup, err := repo.UpdateGroup(tc.updatedGroup)
+				updatedGroup, err := repo.UpdateGroup(*tc.updatedGroup)
 
 				// 結果の検証
 				if tc.shouldError {
@@ -230,7 +232,7 @@ func TestGroupRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				deletedGroup, err := repo.DeleteGroup(tc.group)
+				deletedGroup, err := repo.DeleteGroup(*tc.group)
 
 				// 結果の検証
 				if tc.shouldError {

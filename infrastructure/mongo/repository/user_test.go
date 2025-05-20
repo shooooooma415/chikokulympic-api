@@ -1,3 +1,4 @@
+// filepath: /Users/shoma/Documents/Products/chikokulympic-api/infrastructure/mongo/repository/user_test.go
 package repository_test
 
 import (
@@ -150,7 +151,7 @@ func TestUserRepository(t *testing.T) {
 			{
 				name: "正常系: 新規ユーザー作成",
 				user: &entity.User{
-					UserID:   "new-user-id",
+					// UserIDはリポジトリで自動生成されるので設定しない
 					AuthID:   "new-auth-id",
 					UserName: "New User",
 					FCMToken: "fcm-token-new",
@@ -164,7 +165,7 @@ func TestUserRepository(t *testing.T) {
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
 				// テスト実行
-				createdUser, err := repo.CreateUser(tc.user)
+				createdUser, err := repo.CreateUser(*tc.user)
 
 				// 結果の検証
 				if tc.error {
@@ -172,17 +173,19 @@ func TestUserRepository(t *testing.T) {
 				} else {
 					assert.NoError(t, err)
 					assert.NotNil(t, createdUser)
-					assert.Equal(t, tc.user.UserID, createdUser.UserID)
+
+					// 自動生成されたIDが設定されていることを確認
+					assert.NotEmpty(t, createdUser.UserID)
 
 					// DBに保存されていることを確認
 					var savedUser entity.User
-					err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": tc.user.UserID}).Decode(&savedUser)
+					err = db.Collection("users").FindOne(context.Background(), bson.M{"user_id": createdUser.UserID}).Decode(&savedUser)
 					assert.NoError(t, err)
 					assert.Equal(t, tc.user.UserName, savedUser.UserName)
 				}
 
 				// クリーンアップ
-				_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": tc.user.UserID})
+				_, err = db.Collection("users").DeleteMany(context.Background(), bson.M{"user_id": createdUser.UserID})
 				assert.NoError(t, err)
 			})
 		}
@@ -223,7 +226,7 @@ func TestUserRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				updatedUser, err := repo.UpdateUser(tc.updatedUser)
+				updatedUser, err := repo.UpdateUser(*tc.updatedUser)
 
 				// 結果の検証
 				if tc.error {
@@ -276,8 +279,7 @@ func TestUserRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				userID := tc.user.UserID
-				deletedUser, err := repo.DeleteUser(&userID)
+				deletedUser, err := repo.DeleteUser(*tc.user)
 
 				// 結果の検証
 				if tc.error {
@@ -289,7 +291,7 @@ func TestUserRepository(t *testing.T) {
 
 					// DBから削除されたことを確認
 					var count int64
-					count, err = db.Collection("users").CountDocuments(context.Background(), bson.M{"user_id": userID})
+					count, err = db.Collection("users").CountDocuments(context.Background(), bson.M{"user_id": tc.user.UserID})
 					assert.NoError(t, err)
 					assert.Equal(t, int64(0), count)
 				}

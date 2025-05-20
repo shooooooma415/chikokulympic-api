@@ -9,6 +9,7 @@ import (
 	repo "chikokulympic-api/domain/repository"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -46,7 +47,10 @@ func (r *userRepository) FindUserByAuthID(authID entity.AuthID) (*entity.User, e
 	return &user, nil
 }
 
-func (r *userRepository) CreateUser(user *entity.User) (*entity.User, error) {
+func (r *userRepository) CreateUser(user entity.User) (*entity.User, error) {
+	// 常に新しいObjectIDを生成して文字列に変換し、UserIDにセットする
+	user.UserID = entity.UserID(primitive.NewObjectID().Hex())
+
 	result, err := r.userCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		return nil, err
@@ -56,12 +60,12 @@ func (r *userRepository) CreateUser(user *entity.User) (*entity.User, error) {
 		return nil, fmt.Errorf("failed to insert user")
 	}
 
-	return user, nil
+	return &user, nil
 }
 
-func (r *userRepository) DeleteUser(userID *entity.UserID) (*entity.User, error) {
+func (r *userRepository) DeleteUser(user entity.User) (*entity.User, error) {
 	var deletedUser entity.User
-	filter := bson.M{"user_id": *userID}
+	filter := bson.M{"user_id": user.UserID}
 
 	err := r.userCollection.FindOneAndDelete(context.Background(), filter).Decode(&deletedUser)
 	if err != nil {
@@ -71,7 +75,7 @@ func (r *userRepository) DeleteUser(userID *entity.UserID) (*entity.User, error)
 	return &deletedUser, nil
 }
 
-func (r *userRepository) UpdateUser(user *entity.User) (*entity.User, error) {
+func (r *userRepository) UpdateUser(user entity.User) (*entity.User, error) {
 	filter := bson.M{"user_id": user.UserID}
 	update := bson.M{"$set": user}
 

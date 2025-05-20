@@ -3,9 +3,9 @@ package repository
 import "chikokulympic-api/domain/entity"
 
 type UserRepository interface {
-	FindUserByUserID(UserID entity.UserID) (*entity.User, error)
-	FindUserByAuthID(AuthID entity.AuthID) (*entity.User, error)
-	CreateUser(User *entity.User) (*entity.User, error)
-	DeleteUser(UserID *entity.UserID) (*entity.User, error)
-	UpdateUser(User *entity.User) (*entity.User, error)
+	FindUserByUserID(userID entity.UserID) (*entity.User, error)
+	FindUserByAuthID(authID entity.AuthID) (*entity.User, error)
+	CreateUser(user entity.User) (*entity.User, error)
+	DeleteUser(user entity.User) (*entity.User, error)
+	UpdateUser(user entity.User) (*entity.User, error)
 }
