@@ -60,7 +60,7 @@ func TestGroupRepository(t *testing.T) {
 				}
 
 				// テスト実行
-				foundGroup, err := repo.FindGroupByGroupName(&tc.groupName)
+				foundGroup, err := repo.FindGroupByGroupName(tc.groupName)
 
 				// 結果の検証
 				if tc.shouldError {
@@ -110,7 +110,7 @@ func TestGroupRepository(t *testing.T) {
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
 				// テスト実行
-				createdGroup, err := repo.CreateGroup(tc.group)
+				createdGroup, err := repo.CreateGroup(*tc.group)
 
 				// 結果の検証
 				if tc.shouldError {
@@ -175,7 +175,7 @@ func TestGroupRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				updatedGroup, err := repo.UpdateGroup(tc.updatedGroup)
+				updatedGroup, err := repo.UpdateGroup(*tc.updatedGroup)
 
 				// 結果の検証
 				if tc.shouldError {
@@ -230,7 +230,7 @@ func TestGroupRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				deletedGroup, err := repo.DeleteGroup(tc.group)
+				deletedGroup, err := repo.DeleteGroup(*tc.group)
 
 				// 結果の検証
 				if tc.shouldError {

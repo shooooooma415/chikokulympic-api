@@ -164,7 +164,7 @@ func TestUserRepository(t *testing.T) {
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
 				// テスト実行
-				createdUser, err := repo.CreateUser(tc.user)
+				createdUser, err := repo.CreateUser(*tc.user)
 
 				// 結果の検証
 				if tc.error {
@@ -223,7 +223,7 @@ func TestUserRepository(t *testing.T) {
 				assert.NoError(t, err)
 
 				// テスト実行
-				updatedUser, err := repo.UpdateUser(tc.updatedUser)
+				updatedUser, err := repo.UpdateUser(*tc.updatedUser)
 
 				// 結果の検証
 				if tc.error {
@@ -277,7 +277,7 @@ func TestUserRepository(t *testing.T) {
 
 				// テスト実行
 				userID := tc.user.UserID
-				deletedUser, err := repo.DeleteUser(&userID)
+				deletedUser, err := repo.DeleteUser(userID)
 
 				// 結果の検証
 				if tc.error {
