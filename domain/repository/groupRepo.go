@@ -1,8 +1,6 @@
 package repository
 
-import (
-	"chikokulympic-api/domain/entity"
-)
+import "chikokulympic-api/domain/entity"
 
 type GroupRepository interface {
 	FindGroupByGroupName(Group *entity.GroupName) (*entity.Group, error)
