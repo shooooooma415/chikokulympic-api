@@ -47,8 +47,8 @@ func (g *GetGroupInfo) Handler(c echo.Context) error {
 	}
 
 	groupID := entity.GroupID(groupIDParam)
-	fetchGroupInfoUseCase := usecase.NewFetchGroupInfoUsecase(g.groupRepo, g.userRepo)
-	result, err := fetchGroupInfoUseCase.Execute(groupID)
+	fetchGroupInfoUseCase := usecase.NewFetchGroupInfoUsecase(g.groupRepo, g.userRepo, &groupID)
+	result, err := fetchGroupInfoUseCase.Execute()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, middleware.NewErrorResponse(err.Error()))
 	}
