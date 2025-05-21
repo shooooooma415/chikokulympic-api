@@ -7,27 +7,27 @@ import (
 )
 
 type FetchEventInfoUsecase interface {
-	Execute(groupID entity.EventID) (*entity.Group, error)
+	Execute() (*entity.Event, error)
 }
 type FetchGroupInfoUsecaseImpl struct {
-	groupRepo repository.GroupRepository
-	groupID   *entity.GroupID
+	eventRepo repository.EventRepository
+	eventID   *entity.EventID
 }
 
-func NewFetchEventInfoUsecase(groupRepo repository.GroupRepository, groupID *entity.GroupID) *FetchGroupInfoUsecaseImpl {
+func NewFetchEventInfoUsecase(eventRepo repository.EventRepository, eventID *entity.EventID) *FetchGroupInfoUsecaseImpl {
 	return &FetchGroupInfoUsecaseImpl{
-		groupRepo: groupRepo,
-		groupID:   groupID,
+		eventRepo: eventRepo,
+		eventID:   eventID,
 	}
 }
 
-func (uc *FetchGroupInfoUsecaseImpl) Execute() (*entity.Group, error) {
-	group, err := uc.groupRepo.FindGroupByGroupID(*uc.groupID)
+func (uc *FetchGroupInfoUsecaseImpl) Execute() (*entity.Event, error) {
+	event, err := uc.eventRepo.FindEventByEventID(*uc.eventID)
 	if err != nil {
 		return nil, fmt.Errorf("グループ情報の取得中にエラーが発生しました: %v", err)
 	}
-	if group == nil {
-		return nil, fmt.Errorf("指定されたグループID %s が存在しません", *uc.groupID)
+	if event == nil {
+		return nil, fmt.Errorf("指定されたイベントID %s が存在しません", *uc.eventID)
 	}
-	return group, nil
+	return event, nil
 }
