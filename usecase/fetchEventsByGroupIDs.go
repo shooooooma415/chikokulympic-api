@@ -54,7 +54,6 @@ func (uc *FetchEventsByGroupIDsUsecaseImpl) Execute() ([]entity.Event, error) {
 
 			// グループ内の各イベントIDを処理
 			for _, eventID := range group.GroupEvents {
-				// イベント情報取得
 				event, err := uc.eventRepo.FindEventByEventID(eventID)
 				if err != nil {
 					errMutex.Lock()
@@ -76,7 +75,6 @@ func (uc *FetchEventsByGroupIDsUsecaseImpl) Execute() ([]entity.Event, error) {
 					return
 				}
 
-				// スレッドセーフに結果を追加
 				mutex.Lock()
 				events = append(events, *event)
 				mutex.Unlock()
@@ -84,10 +82,8 @@ func (uc *FetchEventsByGroupIDsUsecaseImpl) Execute() ([]entity.Event, error) {
 		}(groupID)
 	}
 
-	// すべてのgoroutineの完了を待つ
 	wg.Wait()
 
-	// エラーがあれば返す
 	if errOccured {
 		return nil, firstErr
 	}
