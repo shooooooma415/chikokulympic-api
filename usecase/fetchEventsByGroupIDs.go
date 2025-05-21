@@ -6,30 +6,42 @@ import (
 	"fmt"
 )
 
-type FetchEventUsecase interface {
-	Execute() (*entity.Event, error)
+type FetchEventsByGroupIDsUsecase interface {
+	Execute() ([]entity.Event, error)
 }
-type FetchGroupInfoUsecaseImpl struct {
+type FetchEventsByGroupIDsUsecaseImpl struct {
 	groupRepo repository.GroupRepository
 	eventRepo repository.EventRepository
-	eventID   *entity.EventID
+	groupIDs  []entity.GroupID
 }
 
-func NewFetchEventInfoUsecase(groupRepo repository.GroupRepository, eventRepo repository.EventRepository, eventID *entity.EventID) *FetchGroupInfoUsecaseImpl {
-	return &FetchGroupInfoUsecaseImpl{
+func NewFetchEventInfoUsecase(groupRepo repository.GroupRepository, eventRepo repository.EventRepository, groupIDs []entity.GroupID) *FetchEventsByGroupIDsUsecaseImpl {
+	return &FetchEventsByGroupIDsUsecaseImpl{
 		groupRepo: groupRepo,
 		eventRepo: eventRepo,
-		eventID:   eventID,
+		groupIDs:  groupIDs,
 	}
 }
 
-func (uc *FetchGroupInfoUsecaseImpl) Execute() (*entity.Event, error) {
-	event, err := uc.eventRepo.FindEventByEventID(*uc.eventID)
-	if err != nil {
-		return nil, fmt.Errorf("グループ情報の取得中にエラーが発生しました: %v", err)
+func (uc *FetchEventsByGroupIDsUsecaseImpl) Execute() ([]entity.Event, error) {
+	events := make([]entity.Event, 0)
+
+	for _, groupID := range uc.groupIDs {
+		group, err := uc.groupRepo.FindGroupByGroupID(groupID)
+		if err != nil {
+			return nil, fmt.Errorf("グループが見つかりません: %v", err)
+		}
+		for _, eventID := range group.GroupEvents {
+			event, err := uc.eventRepo.FindEventByEventID(eventID)
+			if err != nil {
+				return nil, fmt.Errorf("イベントが見つかりません: %v", err)
+			}
+			if event == nil {
+				return nil, fmt.Errorf("イベントが見つかりません")
+			}
+			events = append(events, *event)
+		}
+
 	}
-	if event == nil {
-		return nil, fmt.Errorf("指定されたイベントID %s が存在しません", *uc.eventID)
-	}
-	return event, nil
+	return events, nil
 }
