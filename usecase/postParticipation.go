@@ -4,7 +4,6 @@ import (
 	"chikokulympic-api/domain/entity"
 	"chikokulympic-api/domain/repository"
 	"fmt"
-	"time"
 )
 
 type PostParticipationUseCase interface {
@@ -12,14 +11,16 @@ type PostParticipationUseCase interface {
 }
 type PostParticipationUseCaseImpl struct {
 	eventRepo repository.EventRepository
+	groupRepo repository.GroupRepository
 	userID    *entity.UserID
 	eventID   *entity.EventID
 	vote      *entity.Vote
 }
 
-func NewPostParticipationUseCase(eventRepo repository.EventRepository, userID *entity.UserID, eventID *entity.EventID, vote *entity.Vote) *PostParticipationUseCaseImpl {
+func NewPostParticipationUseCase(eventRepo repository.EventRepository, groupRepo repository.GroupRepository, userID *entity.UserID, eventID *entity.EventID, vote *entity.Vote) *PostParticipationUseCaseImpl {
 	return &PostParticipationUseCaseImpl{
 		eventRepo: eventRepo,
+		groupRepo: groupRepo,
 		userID:    userID,
 		eventID:   eventID,
 		vote:      vote,
@@ -27,6 +28,7 @@ func NewPostParticipationUseCase(eventRepo repository.EventRepository, userID *e
 }
 
 func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
+	// イベント情報を取得
 	event, err := uc.eventRepo.FindEventByEventID(*uc.eventID)
 	if err != nil {
 		return nil, err
@@ -35,38 +37,51 @@ func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
 		return nil, fmt.Errorf("event not found")
 	}
 
-	// voteの値を参加/不参加として処理
-	voteValue := string(*uc.vote)
+	// イベントの所属グループを検索して、ユーザーがそのグループに参加しているか確認
+	// グループIDをイベントから取得
+	var isGroupMember bool = false
 
-	// 既に同じユーザーのエントリがあるか確認
+	groups, err := uc.groupRepo.FindGroupsByUserID(*uc.userID)
+	if err != nil {
+		return nil, fmt.Errorf("ユーザーの所属グループ取得中にエラーが発生しました: %v", err)
+	}
+
+	// ユーザーがイベントを含むグループに所属しているかチェック
+	for _, group := range groups {
+		for _, eventID := range group.GroupEvents {
+			if eventID == event.EventID {
+				isGroupMember = true
+				break
+			}
+		}
+		if isGroupMember {
+			break
+		}
+	}
+	
+	// グループに所属していない場合はエラー
+	if !isGroupMember {
+		return nil, fmt.Errorf("not a group member. cannot vote")
+	}
+
 	found := false
 	for i, member := range event.VotedMembers {
 		if member.UserID == *uc.userID {
-			// 既存のメンバーの投票情報を更新
-			// 参加ステータスは更新しない(isArrivalは変更しない)
-			// ArrivalDateTimeはvoteが"yes"または"no"の場合に更新
-			if voteValue == "yes" || voteValue == "no" {
-				// 現在時刻を設定
-				event.VotedMembers[i].ArrivalDateTime = time.Now()
+			// 既存のメンバーは上書き
+			event.VotedMembers[i] = entity.VotedMember{
+				UserID: *uc.userID,
+				Vote:   *uc.vote,
 			}
 			found = true
 			break
 		}
 	}
 
-	// 新しいメンバーの場合は追加
 	if !found {
-		// 初期状態ではUserIDのみ設定
 		newMember := entity.VotedMember{
 			UserID: *uc.userID,
+			Vote:   *uc.vote,
 		}
-
-		// voteが"yes"または"no"の場合
-		if voteValue == "yes" || voteValue == "no" {
-			// ArrivalDateTimeを設定
-			newMember.ArrivalDateTime = time.Now()
-		}
-
 		event.VotedMembers = append(event.VotedMembers, newMember)
 	}
 
