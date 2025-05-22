@@ -5,22 +5,22 @@ import (
 	"chikokulympic-api/domain/repository"
 	"time"
 )
+
 type ArrivalRank struct {
-	Rank            int           `json:"rank"`
-	UserID          entity.UserID `json:"user_id"`
-	Name            string        `json:"name"`
-	Alias           entity.Alias  `json:"alias"`
-	ArrivalTime     time.Time     `json:"arrival_time"`
+	Rank        int           `json:"rank"`
+	UserID      entity.UserID `json:"user_id"`
+	Name        string        `json:"name"`
+	Alias       entity.Alias  `json:"alias"`
+	ArrivalTime time.Time     `json:"arrival_time"`
 }
 
-
-type ArrivalRanking struct {
+type getArrivalRankingResponse struct {
 	EventID entity.EventID
-	Ranking   []ArrivalRank
-}
+	Ranking []ArrivalRank
+}3
 
 type getArrivalRankingUseCase interface {
-	Execute() ([]ArrivalRanking, error)
+	Execute() ([]getArrivalRankingResponse, error)
 }
 
 type getArrivalRankingUseCaseImpl struct {
