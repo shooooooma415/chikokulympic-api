@@ -16,7 +16,6 @@ type ArrivalRank struct {
 	ArrivalTime int             `json:"arrival_ime"`
 }
 
-// レスポンス構造体
 type GetArrivalRankingResponse struct {
 	EventID entity.EventID `json:"event_id"`
 	Ranking []ArrivalRank  `json:"ranking"`
@@ -41,16 +40,14 @@ func NewGetArrivalRankingUseCase(eventRepo repository.EventRepository, eventID *
 }
 
 func (uc *GetArrivalRankingUseCaseImpl) Execute() (*GetArrivalRankingResponse, error) {
-	// イベントを取得
 	event, err := uc.eventRepo.FindEventByEventID(*uc.eventID)
 	if err != nil {
 		return nil, err
 	}
 	if event == nil {
-		return nil, fmt.Errorf("イベントが見つかりません")
+		return nil, fmt.Errorf("event not found")
 	}
 
-	// イベントに投票済みのメンバー情報を処理
 	if len(event.VotedMembers) == 0 {
 		return &GetArrivalRankingResponse{
 			EventID: event.EventID,
@@ -58,22 +55,18 @@ func (uc *GetArrivalRankingUseCaseImpl) Execute() (*GetArrivalRankingResponse, e
 		}, nil
 	}
 
-	// ユーザーIDのリストを取得して、ユーザー情報を取得
 	var userIDs []entity.UserID
 	for _, member := range event.VotedMembers {
 		if !member.IsArrival {
-			continue // 参加していないメンバーはスキップ
+			continue // 到着していないメンバーはスキップ
 		}
 		userIDs = append(userIDs, member.UserID)
 	}
 
-	// ユーザー情報をマップに格納
 	userMap := make(map[entity.UserID]*entity.User)
 	for _, userID := range userIDs {
-		// 各ユーザー情報を個別に取得
 		user, err := uc.userRepo.FindUserByUserID(userID)
 		if err != nil {
-			// エラーが発生してもスキップして続行
 			continue
 		}
 		if user != nil {
@@ -81,10 +74,9 @@ func (uc *GetArrivalRankingUseCaseImpl) Execute() (*GetArrivalRankingResponse, e
 		}
 	}
 
-	// イベント開始時間
 	eventStartTime := time.Time(event.EventStartDateTime)
 
-	// 到着時間とイベント開始時間の差でランキングを作成
+	// ランキングの作成
 	var ranking []ArrivalRank
 	for _, member := range event.VotedMembers {
 		if !member.IsArrival {
@@ -97,10 +89,7 @@ func (uc *GetArrivalRankingUseCaseImpl) Execute() (*GetArrivalRankingResponse, e
 			continue // ユーザー情報がない場合はスキップ
 		}
 
-		// 時間差（ミリ秒）を計算
 		timeDiff := member.ArrivalDateTime.Sub(eventStartTime)
-
-		// 分単位に変換
 		timeDiffMinutes := int(timeDiff.Minutes())
 
 		// ランキングエントリーを作成
@@ -113,7 +102,7 @@ func (uc *GetArrivalRankingUseCaseImpl) Execute() (*GetArrivalRankingResponse, e
 		ranking = append(ranking, rankEntry)
 	}
 
-	// 時間差が小さい順（差が少ないほど高ランク）にソート
+	// ソート
 	sort.Slice(ranking, func(i, j int) bool {
 		return ranking[i].ArrivalTime < ranking[j].ArrivalTime
 	})
