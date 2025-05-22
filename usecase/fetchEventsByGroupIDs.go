@@ -4,7 +4,9 @@ import (
 	"chikokulympic-api/domain/entity"
 	"chikokulympic-api/domain/repository"
 	"fmt"
+	"sort"
 	"sync"
+	"time"
 )
 
 type FetchEventsByGroupIDsUsecase interface {
@@ -87,6 +89,14 @@ func (uc *FetchEventsByGroupIDsUsecaseImpl) Execute() ([]entity.Event, error) {
 	if errOccured {
 		return nil, firstErr
 	}
+
+	// EventStartDateTimeの降順でソート
+	sort.Slice(events, func(i, j int) bool {
+		// time.Timeに変換して比較（降順なのでj > iの順番で比較）
+		timeI := time.Time(events[i].EventStartDateTime)
+		timeJ := time.Time(events[j].EventStartDateTime)
+		return timeJ.Before(timeI)
+	})
 
 	return events, nil
 }
