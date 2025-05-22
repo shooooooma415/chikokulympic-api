@@ -18,6 +18,7 @@ type Vote string
 type VotedMember struct {
 	IsArrival       bool      `bson:"is_arrival" json:"is_arrival"`
 	UserID          UserID    `bson:"user_id" json:"user_id"`
+	Vote            Vote      `bson:"vote" json:"vote"`
 	ArrivalDateTime time.Time `bson:"arrival_date_time" json:"arrival_date_time"`
 }
 
