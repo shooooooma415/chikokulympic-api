@@ -7,15 +7,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type AuthServer struct {
+type UserServer struct {
 	signup        *presentationV1.Signup
 	signin        *presentationV1.Signin
 	updateUser    *presentationV1.UpdateUser
 	getUserGroups *presentationV1.GetUserGroups
 }
 
-func NewAuthServer(userRepo repository.UserRepository, groupRepo repository.GroupRepository) *AuthServer {
-	return &AuthServer{
+func NewUserServer(userRepo repository.UserRepository, groupRepo repository.GroupRepository) *UserServer {
+	return &UserServer{
 		signup:        presentationV1.NewSignup(userRepo),
 		signin:        presentationV1.NewSignin(userRepo),
 		updateUser:    presentationV1.NewUpdateUser(userRepo),
@@ -23,7 +23,7 @@ func NewAuthServer(userRepo repository.UserRepository, groupRepo repository.Grou
 	}
 }
 
-func (s *AuthServer) RegisterRoutes(e *echo.Echo) {
+func (s *UserServer) RegisterRoutes(e *echo.Echo) {
 	authGroup := e.Group("/users")
 
 	authGroup.POST("/signup", s.signup.Handler)
