@@ -46,11 +46,11 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	groupRepo := repository.NewGroupRepository(db)
 
-	authServer := serverV1.NewAuthServer(userRepo, groupRepo)
+	userServer := serverV1.NewUserServer(userRepo, groupRepo)
 	groupServer := serverV1.NewGroupServer(groupRepo, userRepo)
 
 	groupServer.RegisterRoutes(e)
-	authServer.RegisterRoutes(e)
+	userServer.RegisterRoutes(e)
 
 	port := config.GetEnvWithDefault("PORT", "8080")
 	e.Start(":" + port)
