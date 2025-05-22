@@ -6,6 +6,16 @@ import (
 	"sync"
 )
 
+type FetchGroupInfoUsecase interface {
+	Execute() (*GroupInfoResponse, error)
+}
+
+type GroupInfoFetcherUsecaseImpl struct {
+	groupRepo repository.GroupRepository
+	userRepo  repository.UserRepository
+	groupID   *entity.GroupID
+}
+
 type Member struct {
 	ID   entity.UserID   `json:"id"`
 	Name entity.UserName `json:"name"`
@@ -19,20 +29,17 @@ type GroupInfoResponse struct {
 	GroupManagerID entity.UserID        `json:"group_manager_id"`
 }
 
-type FetchGroupInfoUsecase struct {
-	groupRepo repository.GroupRepository
-	userRepo  repository.UserRepository
-}
 
-func NewFetchGroupInfoUsecase(groupRepo repository.GroupRepository, userRepo repository.UserRepository) *FetchGroupInfoUsecase {
-	return &FetchGroupInfoUsecase{
+func NewFetchGroupInfoUsecase(groupRepo repository.GroupRepository, userRepo repository.UserRepository, groupID *entity.GroupID) FetchGroupInfoUsecase {
+	return &GroupInfoFetcherUsecaseImpl{
 		groupRepo: groupRepo,
 		userRepo:  userRepo,
+		groupID:   groupID,
 	}
 }
 
-func (u *FetchGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoResponse, error) {
-	group, err := u.groupRepo.FindGroupByGroupID(groupID)
+func (uc *GroupInfoFetcherUsecaseImpl) Execute() (*GroupInfoResponse, error) {
+	group, err := uc.groupRepo.FindGroupByGroupID(*uc.groupID)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +54,7 @@ func (u *FetchGroupInfoUsecase) Execute(groupID entity.GroupID) (*GroupInfoRespo
 		go func(id entity.UserID) {
 			defer wg.Done()
 
-			user, err := u.userRepo.FindUserByUserID(id)
+			user, err := uc.userRepo.FindUserByUserID(id)
 			if err != nil {
 				return
 			}
