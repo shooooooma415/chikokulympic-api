@@ -34,6 +34,17 @@ func NewPostEvent(groupRepo repository.GroupRepository, eventRepo repository.Eve
 	}
 }
 
+// @Summary create event
+// @Description create a new event
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param request body PostEventRequest true "request"
+// @Success 201 {object} PostEventResponse
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /events [post]
+
 func (p *PostEvent) Execute(req PostEventRequest) (*PostEventResponse, error) {
 	event := &entity.Event{
 		EventID:              req.EventID,
