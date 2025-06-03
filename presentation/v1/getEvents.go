@@ -27,6 +27,17 @@ func NewGetEvents(eventRepo repository.EventRepository, groupRepo repository.Gro
 	}
 }
 
+// @Summary Get Events
+// @Description Get events by group IDs
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param group_ids query string true "Comma-separated list of group IDs"
+// @Success 200 {object} GetEventsResponse
+// @Failure 400 {object} middleware.ErrorResponse
+// @Failure 500 {object} middleware.ErrorResponse
+// @Router /events [get]
+
 func (g *GetEvents) Handler(c echo.Context) error {
 	groupIDsParam := c.QueryParam("group_ids")
 	if groupIDsParam == "" {
