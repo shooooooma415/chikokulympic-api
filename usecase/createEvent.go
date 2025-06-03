@@ -26,22 +26,18 @@ func NewCreateEventUseCase(eventRepo repository.EventRepository, groupRepo repos
 }
 
 func (uc *CreateEventUseCaseImpl) Execute() (*entity.Event, error) {
-	// イベントを作成
 	createdEvent, err := uc.eventRepo.CreateEvent(*uc.event)
 	if err != nil {
 		return nil, err
 	}
 
-	// 指定したグループを取得
 	group, err := uc.groupRepo.FindGroupByGroupID(uc.groupID)
 	if err != nil {
 		return nil, err
 	}
 
-	// グループのイベントリストにイベントIDを追加
 	group.GroupEvents = append(group.GroupEvents, createdEvent.EventID)
 
-	// グループを更新
 	_, err = uc.groupRepo.UpdateGroup(*group)
 	if err != nil {
 		return nil, err
