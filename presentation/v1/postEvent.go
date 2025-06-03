@@ -21,3 +21,43 @@ type PostEventRequest struct {
 type PostEventResponse struct {
 	EventID              entity.EventID          `json:"event_id" example:"event123"`
 }
+
+type PostEvent struct {
+	groupRepo repository.GroupRepository
+	eventRepo repository.EventRepository
+}
+
+func NewPostEvent(groupRepo repository.GroupRepository, eventRepo repository.EventRepository) *PostEvent {
+	return &PostEvent{
+		groupRepo: groupRepo,
+		eventRepo: eventRepo,
+	}
+}
+
+func (p *PostEvent) Execute(req PostEventRequest) (*PostEventResponse, error) {
+	event := &entity.Event{
+		EventID:              req.EventID,
+		EventTitle:           req.EventTitle,
+		EventDescription:     req.EventDescription,
+		EventLocationName:    req.EventLocationName,
+		Cost:                 req.Cost,
+		EventMessage:         req.EventMessage,
+		EventAuthorID:        req.EventAuthorID,
+		Latitude:             req.Latitude,
+		Longitude:            req.Longitude,
+		EventStartDateTime:   entity.StartDateTIme(req.EventStartDateTime),
+		EventEndDateTime:     entity.EndDateTime(req.EventEndDateTime),
+		EventClosingDateTime: entity.EventClosingDateTime(req.EventClosingDateTime),
+	}
+
+	createdEvent,err := usecase.NewCreateEventUseCase(p.eventRepo, p.groupRepo, event, req.GroupID).Execute()
+	if err != nil {
+		return nil, middleware.NewErrorResponse(err.Error())
+	}
+
+	response := &PostEventResponse{
+		EventID: createdEvent.EventID,
+	}
+
+	return c.JSON(http.StatusCreated, response)
+}
