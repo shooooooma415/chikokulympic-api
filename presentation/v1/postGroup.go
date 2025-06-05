@@ -7,7 +7,6 @@ import (
 	"chikokulympic-api/usecase"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -55,7 +54,6 @@ func (p *PostGroup) Handler(c echo.Context) error {
 	}
 
 	group := &entity.Group{
-		GroupID:          entity.GroupID(groupID),
 		GroupName:        req.GroupName,
 		GroupPassword:    req.GroupPassword,
 		GroupManagerID:   req.ManagerID,
