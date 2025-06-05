@@ -1,25 +1,33 @@
 package v1
 
-import "chikokulympic-api/domain/entity"
+import (
+	"chikokulympic-api/domain/entity"
+	"chikokulympic-api/domain/repository"
+	"chikokulympic-api/middleware"
+	"chikokulympic-api/usecase"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+)
 
 type PostEventRequest struct {
-	GroupID              entity.GroupID          `json:"group_id" example:"group123"`
-	EventID              entity.EventID          `json:"event_id" example:"event123"`
-	EventTitle           entity.EventTitle       `json:"event_title" example:"テストイベント"`
-	EventDescription     entity.EventDescription `json:"event_description" example:"これはテストイベントです"`
-	EventLocationName    entity.LocationName     `json:"event_location_name" example:"東京ドーム"`
-	Cost                 entity.Cost             `json:"cost" example:"1000"`
-	EventMessage         entity.EventMessage     `json:"event_message" example:"参加してください！"`
-	EventAuthorID        entity.UserID           `json:"event_author_id" example:"user123"`
-	Latitude             entity.Latitude         `json:"latitude" example:"35.6895"`
-	Longitude            entity.Longitude        `json:"longitude" example:"139.6917"`
-	EventStartDateTime   string                  `json:"event_start_date_time" example:"2023-10-01T10:00:00Z"`
-	EventEndDateTime     string                  `json:"event_end_date_time" example:"2023-10-01T12:00:00Z"`
-	EventClosingDateTime string                  `json:"event_closing_date_time" example:"2023-09-30T23:59:59Z"`
+	GroupID              entity.GroupID              `json:"group_id" example:"group123"`
+	EventID              entity.EventID              `json:"event_id" example:"event123"`
+	EventTitle           entity.EventTitle           `json:"event_title" example:"テストイベント"`
+	EventDescription     entity.EventDescription     `json:"event_description" example:"これはテストイベントです"`
+	EventLocationName    entity.LocationName         `json:"event_location_name" example:"東京ドーム"`
+	Cost                 entity.Cost                 `json:"cost" example:"1000"`
+	EventMessage         entity.EventMessage         `json:"event_message" example:"参加してください！"`
+	EventAuthorID        entity.UserID               `json:"event_author_id" example:"user123"`
+	Latitude             entity.Latitude             `json:"latitude" example:"35.6895"`
+	Longitude            entity.Longitude            `json:"longitude" example:"139.6917"`
+	EventStartDateTime   entity.StartDateTIme        `json:"event_start_date_time" example:"2023-10-01T10:00:00Z"`
+	EventEndDateTime     entity.EndDateTime          `json:"event_end_date_time" example:"2023-10-01T12:00:00Z"`
+	EventClosingDateTime entity.EventClosingDateTime `json:"event_closing_date_time" example:"2023-09-30T23:59:59Z"`
 }
 
 type PostEventResponse struct {
-	EventID              entity.EventID          `json:"event_id" example:"event123"`
+	EventID entity.EventID `json:"event_id" example:"event123"`
 }
 
 type PostEvent struct {
@@ -45,7 +53,7 @@ func NewPostEvent(groupRepo repository.GroupRepository, eventRepo repository.Eve
 // @Failure 500 {object} middleware.ErrorResponse
 // @Router /events [post]
 
-func (p *PostEvent) Execute(req PostEventRequest) (*PostEventResponse, error) {
+func (p *PostEvent) Execute(c echo.Context, req PostEventRequest) error {
 	event := &entity.Event{
 		EventID:              req.EventID,
 		EventTitle:           req.EventTitle,
@@ -56,14 +64,14 @@ func (p *PostEvent) Execute(req PostEventRequest) (*PostEventResponse, error) {
 		EventAuthorID:        req.EventAuthorID,
 		Latitude:             req.Latitude,
 		Longitude:            req.Longitude,
-		EventStartDateTime:   entity.StartDateTIme(req.EventStartDateTime),
-		EventEndDateTime:     entity.EndDateTime(req.EventEndDateTime),
-		EventClosingDateTime: entity.EventClosingDateTime(req.EventClosingDateTime),
+		EventStartDateTime:   req.EventStartDateTime,
+		EventEndDateTime:     req.EventEndDateTime,
+		EventClosingDateTime: req.EventClosingDateTime,
 	}
 
-	createdEvent,err := usecase.NewCreateEventUseCase(p.eventRepo, p.groupRepo, event, req.GroupID).Execute()
+	createdEvent, err := usecase.NewCreateEventUseCase(p.eventRepo, p.groupRepo, event, req.GroupID).Execute()
 	if err != nil {
-		return nil, middleware.NewErrorResponse(err.Error())
+		return c.JSON(http.StatusInternalServerError, middleware.NewErrorResponse(err.Error()))
 	}
 
 	response := &PostEventResponse{
