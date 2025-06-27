@@ -28,7 +28,6 @@ func NewPostParticipationUseCase(eventRepo repository.EventRepository, groupRepo
 }
 
 func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
-	// イベント情報を取得
 	event, err := uc.eventRepo.FindEventByEventID(*uc.eventID)
 	if err != nil {
 		return nil, err
@@ -37,8 +36,6 @@ func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
 		return nil, fmt.Errorf("event not found")
 	}
 
-	// イベントの所属グループを検索して、ユーザーがそのグループに参加しているか確認
-	// グループIDをイベントから取得
 	var isGroupMember bool = false
 
 	groups, err := uc.groupRepo.FindGroupsByUserID(*uc.userID)
@@ -46,7 +43,6 @@ func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
 		return nil, fmt.Errorf("ユーザーの所属グループ取得中にエラーが発生しました: %v", err)
 	}
 
-	// ユーザーがイベントを含むグループに所属しているかチェック
 	for _, group := range groups {
 		for _, eventID := range group.GroupEvents {
 			if eventID == event.EventID {
@@ -58,8 +54,7 @@ func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
 			break
 		}
 	}
-	
-	// グループに所属していない場合はエラー
+
 	if !isGroupMember {
 		return nil, fmt.Errorf("not a group member. cannot vote")
 	}
@@ -67,7 +62,6 @@ func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
 	found := false
 	for i, member := range event.VotedMembers {
 		if member.UserID == *uc.userID {
-			// 既存のメンバーは上書き
 			event.VotedMembers[i] = entity.VotedMember{
 				UserID: *uc.userID,
 				Vote:   *uc.vote,
@@ -85,10 +79,9 @@ func (uc *PostParticipationUseCaseImpl) Execute() (*entity.Event, error) {
 		event.VotedMembers = append(event.VotedMembers, newMember)
 	}
 
-	// イベント情報を更新
 	updatedEvent, err := uc.eventRepo.UpdateEvent(*event)
 	if err != nil {
-		return nil, fmt.Errorf("参加情報の更新に失敗しました: %v", err)
+		return nil, fmt.Errorf("投票情報の更新に失敗しました: %v", err)
 	}
 
 	return updatedEvent, nil
