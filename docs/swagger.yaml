@@ -228,6 +228,18 @@ definitions:
         example: group123
         type: string
     type: object
+  v1.PostVoteRequest:
+    properties:
+      option:
+        example: 参加
+        type: string
+      user_id:
+        example: user123
+        type: string
+    required:
+    - option
+    - user_id
+    type: object
   v1.SigninRequest:
     properties:
       auth_id:
@@ -317,6 +329,47 @@ paths:
           schema:
             $ref: '#/definitions/middleware.ErrorResponse'
       summary: create event
+      tags:
+      - events
+  /events/{event_id}/votes:
+    post:
+      consumes:
+      - application/json
+      description: post a vote for an event
+      parameters:
+      - description: Event ID
+        in: path
+        name: event_id
+        required: true
+        type: string
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.PostVoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: post vote
       tags:
       - events
   /events/board:

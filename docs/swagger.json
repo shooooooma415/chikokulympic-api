@@ -99,6 +99,68 @@
                 }
             }
         },
+        "/events/{event_id}/votes": {
+            "post": {
+                "description": "post a vote for an event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "post vote",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Event ID",
+                        "name": "event_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.PostVoteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/groups": {
             "post": {
                 "description": "create a new group",
@@ -806,6 +868,23 @@
                 "group_id": {
                     "type": "string",
                     "example": "group123"
+                }
+            }
+        },
+        "v1.PostVoteRequest": {
+            "type": "object",
+            "required": [
+                "option",
+                "user_id"
+            ],
+            "properties": {
+                "option": {
+                    "type": "string",
+                    "example": "参加"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "user123"
                 }
             }
         },
