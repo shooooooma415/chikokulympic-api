@@ -11,6 +11,7 @@ type EventServer struct {
 	postEvent     *presentationV1.PostEvent
 	getEvents     *presentationV1.GetEvents
 	getEventBoard *presentationV1.GetEventBoard
+	postVote      *presentationV1.PostVote
 }
 
 func NewEventServer(eventRepo repository.EventRepository, groupRepo repository.GroupRepository, userRepo repository.UserRepository) *EventServer {
@@ -18,6 +19,7 @@ func NewEventServer(eventRepo repository.EventRepository, groupRepo repository.G
 		postEvent:     presentationV1.NewPostEvent(groupRepo, eventRepo),
 		getEvents:     presentationV1.NewGetEvents(eventRepo, groupRepo),
 		getEventBoard: presentationV1.NewGetEventBoard(groupRepo, eventRepo, userRepo),
+		postVote:      presentationV1.NewPostVote(eventRepo, groupRepo, userRepo),
 	}
 }
 
@@ -27,4 +29,5 @@ func (s *EventServer) RegisterRoutes(e *echo.Echo) {
 	eventGroup.POST("", s.postEvent.Handler)
 	eventGroup.GET("", s.getEvents.Handler)
 	eventGroup.GET("/board", s.getEventBoard.Handler)
+	eventGroup.POST("/:event_id/votes", s.postVote.Handler)
 }
