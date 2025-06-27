@@ -22,5 +22,5 @@ func NewUpdateUserUseCase(userRepo repository.UserRepository, user *entity.User)
 }
 
 func (uc *UpdateUserUseCaseImpl) Execute() (*entity.User, error) {
-	return uc.userRepo.UpdateUser(uc.user)
+	return uc.userRepo.UpdateUser(*uc.user)
 }

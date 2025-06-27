@@ -94,6 +94,6 @@ func (uc *LeaveGroupUseCaseImpl) Execute() error {
 		return fmt.Errorf("user is not a member of the group")
 	}
 
-	_, err = uc.groupRepo.UpdateGroup(groupFound)
+	_, err = uc.groupRepo.UpdateGroup(*groupFound)
 	return err
 }

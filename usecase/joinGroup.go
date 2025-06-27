@@ -6,7 +6,6 @@ import (
 	"fmt"
 )
 
-
 type JoinGroupUseCase interface {
 	Execute() (*entity.GroupID, error)
 }
@@ -27,10 +26,8 @@ func NewJoinGroupUseCase(groupRepo repository.GroupRepository, userRepo reposito
 	}
 }
 
-
-
 func (uc *JoinGroupUseCaseImpl) Execute() (*entity.GroupID, error) {
-	groupFound, err := uc.groupRepo.FindGroupByGroupName(&uc.group.GroupName)
+	groupFound, err := uc.groupRepo.FindGroupByGroupName(uc.group.GroupName)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +59,7 @@ func (uc *JoinGroupUseCaseImpl) Execute() (*entity.GroupID, error) {
 
 	groupFound.GroupMembers = append(groupFound.GroupMembers, user.UserID)
 
-	updatedGroup, err := uc.groupRepo.UpdateGroup(groupFound)
+	updatedGroup, err := uc.groupRepo.UpdateGroup(*groupFound)
 	if err != nil {
 		return nil, err
 	}

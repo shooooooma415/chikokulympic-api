@@ -33,12 +33,12 @@ func (uc *CreateGroupUseCaseImpl) Execute() (*entity.Group, error) {
 		return nil, fmt.Errorf("指定されたユーザーID %s が存在しません", string(uc.group.GroupManagerID))
 	}
 
-	existingGroup, err := uc.groupRepo.FindGroupByGroupName(&uc.group.GroupName)
+	existingGroup, err := uc.groupRepo.FindGroupByGroupName(uc.group.GroupName)
 	if err == nil && existingGroup != nil {
 		return nil, fmt.Errorf("グループ名 '%s' は既に使用されています", string(uc.group.GroupName))
 	}
 
 	uc.group.GroupMembers = append(uc.group.GroupMembers, uc.group.GroupManagerID)
 
-	return uc.groupRepo.CreateGroup(uc.group)
+	return uc.groupRepo.CreateGroup(*uc.group)
 }
