@@ -27,8 +27,6 @@ var mongoConnectErr error
 var db *mongo.Database
 
 func main() {
-	// Cloud Run環境では.env.localファイルが存在しない可能性があるため、
-	// 環境変数が設定されていない場合のみ.env.localを読み込む
 	if os.Getenv("MONGO_URI") == "" {
 		config.LoadFromFileOrEnv(".env.local")
 	}
@@ -43,7 +41,6 @@ func main() {
 		mongoConnectErr = err
 		log.Printf("Failed to connect to MongoDB: %v", err)
 	} else {
-		// 接続テスト
 		err = client.Ping(context.TODO(), nil)
 		if err != nil {
 			mongoConnectErr = err
@@ -63,7 +60,6 @@ func main() {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello Chikokulympic-api"})
 	})
 
-	// Cloud Run用のヘルスチェックエンドポイント
 	e.GET("/health", func(c echo.Context) error {
 		if mongoConnectErr != nil {
 			return c.JSON(http.StatusServiceUnavailable, map[string]string{"status": "unhealthy", "error": mongoConnectErr.Error()})
