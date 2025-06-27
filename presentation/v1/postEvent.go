@@ -52,8 +52,12 @@ func NewPostEvent(groupRepo repository.GroupRepository, eventRepo repository.Eve
 // @Failure 400 {object} middleware.ErrorResponse
 // @Failure 500 {object} middleware.ErrorResponse
 // @Router /events [post]
+func (p *PostEvent) Handler(c echo.Context) error {
+	req := new(PostEventRequest)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, middleware.NewErrorResponse(err.Error()))
+	}
 
-func (p *PostEvent) Execute(c echo.Context, req PostEventRequest) error {
 	event := &entity.Event{
 		EventID:              req.EventID,
 		EventTitle:           req.EventTitle,
