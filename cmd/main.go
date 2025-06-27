@@ -45,12 +45,15 @@ func main() {
 
 	userRepo := repository.NewUserRepository(db)
 	groupRepo := repository.NewGroupRepository(db)
+	eventRepo := repository.NewEventRepository(db)
 
 	userServer := serverV1.NewUserServer(userRepo, groupRepo)
 	groupServer := serverV1.NewGroupServer(groupRepo, userRepo)
+	eventServer := serverV1.NewEventServer(eventRepo, groupRepo, userRepo)
 
 	groupServer.RegisterRoutes(e)
 	userServer.RegisterRoutes(e)
+	eventServer.RegisterRoutes(e)
 
 	port := config.GetEnvWithDefault("PORT", "8080")
 	e.Start(":" + port)
