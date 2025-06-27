@@ -15,6 +15,96 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/events": {
+            "post": {
+                "description": "create a new event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "create event",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.PostEventRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/v1.PostEventResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/events/board": {
+            "get": {
+                "description": "get events by group IDs for event board",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "get event board",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of group IDs",
+                        "name": "group_ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecase.FetchEventBoardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/groups": {
             "post": {
                 "description": "create a new group",
@@ -402,6 +492,109 @@ const docTemplate = `{
                 }
             }
         },
+        "usecase.EventBoardAuthor": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "author_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecase.EventBoardEvent": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/usecase.EventBoardAuthor"
+                },
+                "closing_time": {
+                    "type": "string"
+                },
+                "cost": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "group_id": {
+                    "type": "string"
+                },
+                "group_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_all_day": {
+                    "type": "boolean"
+                },
+                "latitude": {
+                    "type": "string"
+                },
+                "location_name": {
+                    "type": "string"
+                },
+                "longitude": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usecase.EventBoardOption"
+                    }
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecase.EventBoardOption": {
+            "type": "object",
+            "properties": {
+                "participant_count": {
+                    "type": "integer"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "user_id": {
+                                "type": "string"
+                            },
+                            "user_name": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecase.FetchEventBoardResponse": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usecase.EventBoardEvent"
+                    }
+                }
+            }
+        },
         "usecase.GroupResponse": {
             "type": "object",
             "properties": {
@@ -517,6 +710,72 @@ const docTemplate = `{
                 "user_id": {
                     "type": "string",
                     "example": "user_id"
+                }
+            }
+        },
+        "v1.PostEventRequest": {
+            "type": "object",
+            "properties": {
+                "cost": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "event_author_id": {
+                    "type": "string",
+                    "example": "user123"
+                },
+                "event_closing_date_time": {
+                    "type": "string",
+                    "example": "2023-09-30T23:59:59Z"
+                },
+                "event_description": {
+                    "type": "string",
+                    "example": "これはテストイベントです"
+                },
+                "event_end_date_time": {
+                    "type": "string",
+                    "example": "2023-10-01T12:00:00Z"
+                },
+                "event_id": {
+                    "type": "string",
+                    "example": "event123"
+                },
+                "event_location_name": {
+                    "type": "string",
+                    "example": "東京ドーム"
+                },
+                "event_message": {
+                    "type": "string",
+                    "example": "参加してください！"
+                },
+                "event_start_date_time": {
+                    "type": "string",
+                    "example": "2023-10-01T10:00:00Z"
+                },
+                "event_title": {
+                    "type": "string",
+                    "example": "テストイベント"
+                },
+                "group_id": {
+                    "type": "string",
+                    "example": "group123"
+                },
+                "latitude": {
+                    "type": "number",
+                    "example": 35.6895
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 139.6917
+                }
+            }
+        },
+        "v1.PostEventResponse": {
+            "type": "object",
+            "properties": {
+                "event_id": {
+                    "type": "string",
+                    "example": "event123"
                 }
             }
         },

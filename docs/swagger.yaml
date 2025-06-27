@@ -5,6 +5,73 @@ definitions:
       error:
         type: string
     type: object
+  usecase.EventBoardAuthor:
+    properties:
+      author_id:
+        type: string
+      author_name:
+        type: string
+    type: object
+  usecase.EventBoardEvent:
+    properties:
+      author:
+        $ref: '#/definitions/usecase.EventBoardAuthor'
+      closing_time:
+        type: string
+      cost:
+        type: integer
+      description:
+        type: string
+      end_time:
+        type: string
+      group_id:
+        type: string
+      group_name:
+        type: string
+      id:
+        type: string
+      is_all_day:
+        type: boolean
+      latitude:
+        type: string
+      location_name:
+        type: string
+      longitude:
+        type: string
+      message:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/usecase.EventBoardOption'
+        type: array
+      start_time:
+        type: string
+      title:
+        type: string
+    type: object
+  usecase.EventBoardOption:
+    properties:
+      participant_count:
+        type: integer
+      participants:
+        items:
+          properties:
+            user_id:
+              type: string
+            user_name:
+              type: string
+          type: object
+        type: array
+      title:
+        type: string
+    type: object
+  usecase.FetchEventBoardResponse:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/usecase.EventBoardEvent'
+        type: array
+    type: object
   usecase.GroupResponse:
     properties:
       id:
@@ -86,6 +153,54 @@ definitions:
         type: string
     required:
     - user_id
+    type: object
+  v1.PostEventRequest:
+    properties:
+      cost:
+        example: 1000
+        type: integer
+      event_author_id:
+        example: user123
+        type: string
+      event_closing_date_time:
+        example: "2023-09-30T23:59:59Z"
+        type: string
+      event_description:
+        example: これはテストイベントです
+        type: string
+      event_end_date_time:
+        example: "2023-10-01T12:00:00Z"
+        type: string
+      event_id:
+        example: event123
+        type: string
+      event_location_name:
+        example: 東京ドーム
+        type: string
+      event_message:
+        example: 参加してください！
+        type: string
+      event_start_date_time:
+        example: "2023-10-01T10:00:00Z"
+        type: string
+      event_title:
+        example: テストイベント
+        type: string
+      group_id:
+        example: group123
+        type: string
+      latitude:
+        example: 35.6895
+        type: number
+      longitude:
+        example: 139.6917
+        type: number
+    type: object
+  v1.PostEventResponse:
+    properties:
+      event_id:
+        example: event123
+        type: string
     type: object
   v1.PostGroupRequest:
     properties:
@@ -174,6 +289,65 @@ info:
   title: Chikokulympic-API
   version: "1.0"
 paths:
+  /events:
+    post:
+      consumes:
+      - application/json
+      description: create a new event
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.PostEventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/v1.PostEventResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: create event
+      tags:
+      - events
+  /events/board:
+    get:
+      consumes:
+      - application/json
+      description: get events by group IDs for event board
+      parameters:
+      - description: Comma-separated list of group IDs
+        in: query
+        name: group_ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecase.FetchEventBoardResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      summary: get event board
+      tags:
+      - events
   /groups:
     post:
       consumes:
