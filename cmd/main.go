@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"os"
 
 	"chikokulympic-api/config"
 	"chikokulympic-api/infrastructure/mongo/repository"
@@ -21,19 +23,37 @@ import (
 // @description This is a Chikokulympic server API.
 // @host localhost:8080
 // @BasePath /
+var mongoConnectErr error
+var db *mongo.Database
+
 func main() {
-	config.LoadFromFileOrEnv(".env.local")
+	// Cloud Run環境では.env.localファイルが存在しない可能性があるため、
+	// 環境変数が設定されていない場合のみ.env.localを読み込む
+	if os.Getenv("MONGO_URI") == "" {
+		config.LoadFromFileOrEnv(".env.local")
+	}
 
 	uri := config.GetRequiredEnv("MONGO_URI")
 	dbName := config.GetRequiredEnv("MONGO_DATABASE")
 
+	log.Printf("Connecting to MongoDB: %s, Database: %s", uri, dbName)
+
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		panic(err)
+		mongoConnectErr = err
+		log.Printf("Failed to connect to MongoDB: %v", err)
+	} else {
+		// 接続テスト
+		err = client.Ping(context.TODO(), nil)
+		if err != nil {
+			mongoConnectErr = err
+			log.Printf("Failed to ping MongoDB: %v", err)
+		} else {
+			log.Println("Successfully connected to MongoDB")
+			db = client.Database(dbName)
+			defer client.Disconnect(context.TODO())
+		}
 	}
-	defer client.Disconnect(context.TODO())
-
-	db := client.Database(dbName)
 
 	e := echo.New()
 
@@ -43,18 +63,32 @@ func main() {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello Chikokulympic-api"})
 	})
 
-	userRepo := repository.NewUserRepository(db)
-	groupRepo := repository.NewGroupRepository(db)
-	eventRepo := repository.NewEventRepository(db)
+	// Cloud Run用のヘルスチェックエンドポイント
+	e.GET("/health", func(c echo.Context) error {
+		if mongoConnectErr != nil {
+			return c.JSON(http.StatusServiceUnavailable, map[string]string{"status": "unhealthy", "error": mongoConnectErr.Error()})
+		}
+		return c.JSON(http.StatusOK, map[string]string{"status": "healthy"})
+	})
 
-	userServer := serverV1.NewUserServer(userRepo, groupRepo)
-	groupServer := serverV1.NewGroupServer(groupRepo, userRepo)
-	eventServer := serverV1.NewEventServer(eventRepo, groupRepo, userRepo)
+	if db != nil {
+		userRepo := repository.NewUserRepository(db)
+		groupRepo := repository.NewGroupRepository(db)
+		eventRepo := repository.NewEventRepository(db)
 
-	groupServer.RegisterRoutes(e)
-	userServer.RegisterRoutes(e)
-	eventServer.RegisterRoutes(e)
+		userServer := serverV1.NewUserServer(userRepo, groupRepo)
+		groupServer := serverV1.NewGroupServer(groupRepo, userRepo)
+		eventServer := serverV1.NewEventServer(eventRepo, groupRepo, userRepo)
+
+		groupServer.RegisterRoutes(e)
+		userServer.RegisterRoutes(e)
+		eventServer.RegisterRoutes(e)
+	}
 
 	port := config.GetEnvWithDefault("PORT", "8080")
-	e.Start(":" + port)
+	log.Printf("Starting server on port %s", port)
+
+	if err := e.Start(":" + port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

@@ -7,14 +7,16 @@ RUN go mod download
 RUN apk add --no-cache git sqlite-dev gcc musl-dev
 
 COPY . .
-RUN go build -o main ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o main ./cmd/main.go
 
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
 
-FROM alpine
-RUN apk update && apk upgrade
-RUN mkdir /app
-WORKDIR /app
+COPY --from=builder /app/main .
 
-COPY --from=builder /app/main ./main
+# Cloud Runは8080ポートを期待する
+ENV PORT=8080
+EXPOSE 8080
 
 CMD ["./main"]
