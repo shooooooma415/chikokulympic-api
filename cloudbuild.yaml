@@ -1,0 +1,4 @@
+cat <<EOF > cloudbuild.yaml
+options:
+  logging: CLOUD_LOGGING_ONLY
+EOF
